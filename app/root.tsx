@@ -8,6 +8,8 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 
 import "./tailwind.css";
+import NavigationAside from "./components/navigation-aside/navigation-aside";
+import { Toaster } from "sonner";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,9 +34,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <div className="md:grid md:grid-cols-12 h-full container mx-auto overflow-y-auto max-h-screen relative">
+          <aside className="md:col-span-3 border-r h-screen p-4 absolute md:sticky md:top-0 bottom-0">
+            <NavigationAside />
+          </aside>
+          <div className="md:col-span-6 overflow-y-auto">{children}</div>
+          <aside className="hidden md:block sticky top-0 md:col-span-3 border-l h-screen p-4 bottom-0">
+            {/* <RightAside users={users} /> */}
+          </aside>
+        </div>
+
         <ScrollRestoration />
         <Scripts />
+        <Toaster />
       </body>
     </html>
   );
