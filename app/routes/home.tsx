@@ -1,41 +1,52 @@
+import { useState } from "react";
 import { json, useLoaderData } from "@remix-run/react";
 
-import PostList from "~/components/post/post-list";
+import { Loader } from "lucide-react";
+import { PostList } from "~/components/post/post-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { useInfiniteScroll } from "~/hooks/use-infinite-scroll";
 
 import type { Post } from "~/types/post";
 import type { LoaderFunction } from "@remix-run/node";
+import type { PaginatedResult } from "~/types";
 
 export const loader: LoaderFunction = async () => {
   const postsResponse = await fetch(`${process.env.VITE_API_URL}/posts`);
-  const posts = (await postsResponse.json()) as Post[];
+  const postsJson = await postsResponse.json();
 
   return json({
-    posts,
+    postsJson,
     apiUrl: process.env.VITE_API_URL,
   });
 };
 
 export default function Home() {
-  const { posts, apiUrl } = useLoaderData<{ posts: Post[]; apiUrl: string }>();
+  const { postsJson, apiUrl } = useLoaderData<{
+    postsJson: PaginatedResult<Post>;
+    apiUrl: string;
+  }>();
+  const [postsMeta, setPostsMeta] = useState(postsJson.meta);
 
   const fetchMorePosts = async (page: number) => {
     const response = await fetch(`${apiUrl}/posts?page=${page}`);
-    const posts = await response.json();
+    const posts: PaginatedResult<Post> = await response.json();
+
+    setPostsMeta(posts.meta);
+
     return posts;
   };
 
-  const { data, loadMoreRef, loading } = useInfiniteScroll({
-    initialData: posts,
-    hasNextPage: false,
+  const {
+    data: posts,
+    loadMoreRef,
+    loading,
+  } = useInfiniteScroll<Post>({
+    initialData: postsJson.data as Post[],
+    page: postsMeta.pagination.page + 1,
+    hasNextPage: postsMeta.pagination.hasNextPage,
     fetchMore: fetchMorePosts,
   });
-
-  const uniquePosts = Array.from(new Set(data.map((post) => post.id))).map(
-    (id) => data.find((post) => post.id === id)
-  );
 
   return (
     <main className="relative flex min-h-screen flex-col">
@@ -57,9 +68,9 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="fyp">
-            <PostList posts={uniquePosts} />
-            <div ref={loadMoreRef} className="loading-trigger">
-              {loading && <p>Loading more posts...</p>}
+            <PostList posts={posts} />
+            <div ref={loadMoreRef} className="my-10 flex justify-center">
+              {loading && <Loader size={32} className="animate-spin" />}
             </div>
           </TabsContent>
           <TabsContent value="following" className="px-4">
