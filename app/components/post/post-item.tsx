@@ -1,17 +1,18 @@
-import { formatPostDate } from "~/lib/date-utils";
+import { Link } from "@remix-run/react";
+
+import { ActionList } from "./action-list";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 
-import type { Post } from "~/types/post";
 import { postActions } from "~/data/actions";
+import { formatPostDate } from "~/lib/date-utils";
 
-import ActionList from "./action-list";
-import { Link } from "@remix-run/react";
+import type { Post } from "~/types/post";
 
 interface Props {
   post: Post;
 }
 
-export default function PostItem({ post }: Props) {
+export function PostItem({ post }: Props) {
   const { user } = post;
 
   const formattedDate = formatPostDate(new Date(post.createdAt));

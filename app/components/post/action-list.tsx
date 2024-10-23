@@ -51,7 +51,7 @@ interface ActionListProps {
   postActions: { name: string; icon: () => JSX.Element }[];
 }
 
-export default function ActionList({ postActions }: ActionListProps) {
+export function ActionList({ postActions }: ActionListProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const handleMouseEnter = useCallback(
