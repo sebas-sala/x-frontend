@@ -10,8 +10,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   username: string;
   password: string;
   profile: Profile;

@@ -3,9 +3,9 @@ import type { Post } from "~/types/post";
 
 export interface Like {
   id: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   user: User;
   post?: Post;
-  comment: Comment;
+  // comment: Comment;
 }

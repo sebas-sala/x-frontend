@@ -4,8 +4,8 @@ import type { User } from "~/types/user";
 export interface Post {
   id: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   user: User;
   comments?: Comment[];
   likes?: Like[];

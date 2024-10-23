@@ -4,9 +4,9 @@ export interface Profile {
   id: string;
   bio?: string;
   location?: string;
-  birthdate?: Date;
+  birthdate?: string;
   website?: string;
   isPublic: boolean;
-  updatedAt: Date;
+  updatedAt: string;
   user: User;
 }
