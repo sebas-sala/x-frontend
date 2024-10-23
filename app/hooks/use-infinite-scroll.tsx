@@ -1,42 +1,55 @@
 import { useState, useEffect, useRef } from "react";
 
+import type { PaginatedResult } from "~/types";
+
 interface UseInfiniteScrollProps<T> {
   initialData: T[];
+  page: number;
   hasNextPage?: boolean;
-  fetchMore: (page: number) => Promise<T[]>;
+  fetchMore: (page: number) => Promise<PaginatedResult<T>>;
 }
 
 export function useInfiniteScroll<T>({
   initialData,
+  page,
   hasNextPage,
   fetchMore,
 }: UseInfiniteScrollProps<T>) {
   const [data, setData] = useState<T[]>(initialData);
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(page);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null); // Para manejar errores
+  const [error, setError] = useState<string | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const attempts = useRef(0);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !loading && !error && hasNextPage) {
+      async (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          !loading &&
+          !error &&
+          hasNextPage &&
+          attempts.current < 3
+        ) {
           setLoading(true);
-          fetchMore(page + 1)
-            .then((newData) => {
-              if (newData.length === 0) {
-                observer.disconnect();
-              } else {
-                setData((prevData) => [...prevData, ...newData]);
-                setPage((prevPage) => prevPage + 1);
-              }
-            })
-            .catch(() => {
-              setError("Failed to load more posts. Try again later.");
-            })
-            .finally(() => {
-              setLoading(false);
-            });
+
+          try {
+            const res = await fetchMore(currentPage);
+            const newData = res.data;
+
+            if (newData.length === 0) {
+              observer.disconnect();
+            } else {
+              setData((prevData) => [...prevData, ...newData]);
+              setCurrentPage((prevPage) => prevPage + 1);
+            }
+          } catch {
+            attempts.current += 1;
+            setError("Failed to load more posts. Try again later.");
+          } finally {
+            setLoading(false);
+          }
         }
       },
       { threshold: 1 }
@@ -52,7 +65,7 @@ export function useInfiniteScroll<T>({
         observer.unobserve(currentRef);
       }
     };
-  }, [loading, page, fetchMore, error, hasNextPage]);
+  }, [loading, currentPage, fetchMore, error, hasNextPage]);
 
   return { data, loadMoreRef, loading, error };
 }
