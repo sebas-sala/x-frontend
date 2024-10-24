@@ -1,24 +1,20 @@
 import { useState, useEffect, useRef } from "react";
-
-import type { PaginatedResult } from "~/types";
+import { PaginatedResult } from "~/types";
 
 interface UseInfiniteScrollProps<T> {
   initialData: T[];
-  page: number;
-  hasNextPage?: boolean;
+  hasNextPage: boolean;
   fetchMore: (page: number) => Promise<PaginatedResult<T>>;
 }
 
 export function useInfiniteScroll<T>({
   initialData,
-  page,
-  hasNextPage,
   fetchMore,
+  hasNextPage,
 }: UseInfiniteScrollProps<T>) {
   const [data, setData] = useState<T[]>(initialData);
-  const [currentPage, setCurrentPage] = useState(page);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const attempts = useRef(0);
 
@@ -28,31 +24,26 @@ export function useInfiniteScroll<T>({
         if (
           entries[0].isIntersecting &&
           !loading &&
-          !error &&
           hasNextPage &&
           attempts.current < 3
         ) {
           setLoading(true);
+          attempts.current += 1;
 
           try {
             const res = await fetchMore(currentPage);
             const newData = res.data;
 
-            if (newData.length === 0) {
-              observer.disconnect();
-            } else {
-              setData((prevData) => [...prevData, ...newData]);
-              setCurrentPage((prevPage) => prevPage + 1);
-            }
-          } catch {
-            attempts.current += 1;
-            setError("Failed to load more posts. Try again later.");
+            setData((prevData) => [...prevData, ...newData]);
+            setCurrentPage((prev) => prev + 1);
+          } catch (error) {
+            console.error("Error loading more data:", error);
           } finally {
             setLoading(false);
           }
         }
       },
-      { threshold: 1 }
+      { threshold: 1.0 }
     );
 
     const currentRef = loadMoreRef.current;
@@ -65,7 +56,7 @@ export function useInfiniteScroll<T>({
         observer.unobserve(currentRef);
       }
     };
-  }, [loading, currentPage, fetchMore, error, hasNextPage]);
+  }, [loading, currentPage, fetchMore, hasNextPage]);
 
-  return { data, loadMoreRef, loading, error };
+  return { data, loadMoreRef, loading, hasNextPage };
 }

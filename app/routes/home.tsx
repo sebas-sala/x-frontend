@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { json, useLoaderData } from "@remix-run/react";
 
-import { Loader } from "lucide-react";
 import { PostList } from "~/components/post/post-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-
-import { useInfiniteScroll } from "~/hooks/use-infinite-scroll";
 
 import type { Post } from "~/types/post";
 import type { LoaderFunction } from "@remix-run/node";
@@ -15,38 +12,67 @@ export const loader: LoaderFunction = async () => {
   const postsResponse = await fetch(`${process.env.VITE_API_URL}/posts`);
   const postsJson = await postsResponse.json();
 
+  const postsByFollowingsResponse = await fetch(
+    `${process.env.VITE_API_URL}/posts?by_following=true`
+  );
+  const postsByFollowingsJson = await postsByFollowingsResponse.json();
+
   return json({
     postsJson,
-    apiUrl: process.env.VITE_API_URL,
+    postsByFollowingsJson,
   });
 };
 
 export default function Home() {
-  const { postsJson, apiUrl } = useLoaderData<{
+  const { postsJson, postsByFollowingsJson } = useLoaderData<{
     postsJson: PaginatedResult<Post>;
-    apiUrl: string;
+    postsByFollowingsJson: PaginatedResult<Post>;
   }>();
-  const [postsMeta, setPostsMeta] = useState(postsJson.meta);
 
-  const fetchMorePosts = async (page: number) => {
-    const response = await fetch(`${apiUrl}/posts?page=${page}`);
+  const [postsFypResponse, setPostsFypResponse] = useState<
+    PaginatedResult<Post>
+  >(postsJson as PaginatedResult<Post>);
+
+  const [postsFollowingResponse, setPostsFollowingResponse] = useState<
+    PaginatedResult<Post>
+  >(postsByFollowingsJson as PaginatedResult<Post>);
+
+  const fetchMorePosts = async (
+    page: number,
+    filters?: Record<string, string | number | boolean>[]
+  ) => {
+    const url = new URL(`${import.meta.env.VITE_API_URL}/posts`);
+
+    if (filters) {
+      filters.forEach((filter) => {
+        Object.entries(filter).forEach(([key, value]) => {
+          url.searchParams.append(key, value.toString());
+        });
+      });
+    }
+
+    url.searchParams.append("page", page.toString());
+
+    const response = await fetch(url.toString());
     const posts: PaginatedResult<Post> = await response.json();
-
-    setPostsMeta(posts.meta);
 
     return posts;
   };
 
-  const {
-    data: posts,
-    loadMoreRef,
-    loading,
-  } = useInfiniteScroll<Post>({
-    initialData: postsJson.data as Post[],
-    page: postsMeta.pagination.page + 1,
-    hasNextPage: postsMeta.pagination.hasNextPage,
-    fetchMore: fetchMorePosts,
-  });
+  const fetchMoreFypPosts = async (page: number) => {
+    const res = await fetchMorePosts(page);
+    setPostsFypResponse(res);
+
+    return res;
+  };
+
+  const fetchMorePostsByFollowings = async (page: number) => {
+    const res = await fetchMorePosts(page, [{ by_following: true }]);
+    console.log(res.data.map((post) => post.id));
+    setPostsFollowingResponse(res);
+
+    return res;
+  };
 
   return (
     <main className="relative flex min-h-screen flex-col">
@@ -68,13 +94,18 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="fyp">
-            <PostList posts={posts} />
-            <div ref={loadMoreRef} className="my-10 flex justify-center">
-              {loading && <Loader size={32} className="animate-spin" />}
-            </div>
+            <PostList
+              posts={postsFypResponse.data as Post[]}
+              pagination={postsFypResponse.meta.pagination}
+              fetchMore={fetchMoreFypPosts}
+            />
           </TabsContent>
-          <TabsContent value="following" className="px-4">
-            Content 2
+          <TabsContent value="following">
+            <PostList
+              posts={postsFollowingResponse.data as Post[]}
+              pagination={postsFollowingResponse.meta.pagination}
+              fetchMore={fetchMorePostsByFollowings}
+            />
           </TabsContent>
         </Tabs>
       </div>
