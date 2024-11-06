@@ -11,8 +11,10 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
-import { createPost } from "~/services/post-services";
+import { createPost } from "~/services/post";
 import { toast } from "sonner";
+import { useState } from "react";
+import { getUser } from "~/services/user";
 
 interface Props {
   privacy: string;
@@ -25,6 +27,8 @@ export default function PostForm({
   handlePrivacyChange,
   handleOnOpenChange,
 }: Props) {
+  const [content, setContent] = useState("Hello, World!");
+
   const getPrivacyTextAndIcon = () => {
     if (privacy === "public") {
       return {
@@ -58,7 +62,7 @@ export default function PostForm({
     try {
       event.preventDefault();
 
-      await createPost();
+      await createPost({ content });
 
       handleOnOpenChange(false);
     } catch (e) {
@@ -78,6 +82,8 @@ export default function PostForm({
           <Textarea
             placeholder="What's on your mind, Chad?"
             className="max-h-36"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
           />
         </div>
       </div>
@@ -86,7 +92,7 @@ export default function PostForm({
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="text-white hover:bg-transparent hover:text-white flex gap-2 items-center"
+              className="flex items-center gap-2 hover:bg-transparent"
             >
               {privacyIcon()}
               {privacyText}
@@ -116,8 +122,9 @@ export default function PostForm({
       {/* <Separator /> */}
 
       <Button
-        className="bg-sky-500 text-white rounded-full px-6 text-xl font-bold hover:bg-sky-400"
+        className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
         type="submit"
+        disabled={!content || content.length < 10}
       >
         Post
       </Button>

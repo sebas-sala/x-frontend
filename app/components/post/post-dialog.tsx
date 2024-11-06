@@ -30,7 +30,7 @@ export function PostDialog({
           Post
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-black text-white ">
+      <DialogContent className="">
         <DialogHeader>
           <DialogTitle className="hidden">Post</DialogTitle>
 

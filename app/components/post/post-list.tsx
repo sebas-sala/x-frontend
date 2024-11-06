@@ -1,39 +1,44 @@
 import { Loader } from "lucide-react";
+import { useInfiniteScroll } from "react-continous-scroll";
+
 import { PostItem } from "./post-item";
 
 import type { Post } from "~/types/post";
-import type { PaginatedResult, Pagination } from "~/types";
-import { useInfiniteScroll } from "~/hooks/use-infinite-scroll";
+import type { Pagination } from "~/types";
 
 interface Props {
   posts: Post[];
   pagination: Pagination;
-  fetchMore: (page: number) => Promise<PaginatedResult<Post>>;
+  fetchMore: (page: number) => Promise<Post[]>;
+  maxPage?: number;
 }
 
-export function PostList({ posts, pagination, fetchMore }: Props) {
-  const { data, loadMoreRef, loading, hasNextPage } = useInfiniteScroll({
+export function PostList({ posts, pagination, fetchMore, maxPage }: Props) {
+  const { data, loadMoreRef, loading, loadMore } = useInfiniteScroll({
     initialData: posts,
-    hasNextPage: pagination.hasNextPage,
-    fetchMore: () => fetchMore(pagination.page + 1),
+    loadMore: pagination?.hasNextPage,
+    onLoadMore: () => fetchMore(pagination.page + 1),
+    maxPage,
   });
 
-  const uniquePosts = Array.from(new Set([...posts, ...data]));
+  async function onClick() {
+    console.log("clicked");
+  }
 
   return (
-    <div>
+    <>
       <ul>
-        {uniquePosts.map((post) => (
-          <PostItem key={post.id} post={post} />
+        {data.map((post) => (
+          <PostItem key={post.id} post={post} onClick={onClick} />
         ))}
       </ul>
 
       <div ref={loadMoreRef} className="my-10 flex justify-center">
         {loading && <Loader size={32} className="animate-spin" />}
-        {!loading && !hasNextPage && (
+        {!loading && !loadMore && (
           <p className="text-gray-500">No more posts to load</p>
         )}
       </div>
-    </div>
+    </>
   );
 }
