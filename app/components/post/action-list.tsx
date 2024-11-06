@@ -3,9 +3,12 @@ import { useState, useCallback, type SetStateAction } from "react";
 import { cn } from "~/lib/utils";
 import { getActionColorName, getActionIconColor } from "~/lib/color-utils";
 
+import type { ActionProps } from "~/types/actions";
+
 interface ActionItemProps {
-  item: { name: string; icon: () => JSX.Element };
+  item: ActionProps;
   isHovered: boolean;
+  entityId?: string;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }
@@ -13,33 +16,46 @@ interface ActionItemProps {
 const ActionItem = ({
   item,
   isHovered,
+  entityId,
   onMouseEnter,
   onMouseLeave,
 }: ActionItemProps) => {
   const colorIcon = getActionIconColor(item.name);
   const colorName = getActionColorName(item.name);
 
+  const handleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!entityId || !item.handleAction) return;
+
+    item.handleAction(entityId);
+  };
+
   return (
     <div
-      className="flex gap-2 cursor-pointer items-center"
+      className="z-40 flex cursor-pointer items-center"
       key={item.name}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onClick={handleClick}
+      role="button"
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          handleClick(event as unknown as React.MouseEvent);
+        }
+      }}
+      tabIndex={0}
     >
       <span
-        className={cn("p-2 rounded-full transition-all duration-200", {
+        className={cn("rounded-full p-2 transition-all duration-200", {
           [colorIcon]: isHovered,
         })}
       >
         {item.icon()}
       </span>
       <span
-        className={cn(
-          "text-sm font-semibold text-white transition-all duration-200",
-          {
-            [colorName]: isHovered,
-          }
-        )}
+        className={cn("text-sm font-semibold transition-all duration-200", {
+          [colorName]: isHovered,
+        })}
       >
         {item.name}
       </span>
@@ -48,17 +64,18 @@ const ActionItem = ({
 };
 
 interface ActionListProps {
-  postActions: { name: string; icon: () => JSX.Element }[];
+  actions: ActionProps[];
+  entityId?: string;
 }
 
-export function ActionList({ postActions }: ActionListProps) {
+export function ActionList({ entityId, actions }: ActionListProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const handleMouseEnter = useCallback(
     (index: SetStateAction<number | null>) => {
       setHoveredIndex(index);
     },
-    []
+    [],
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -66,11 +83,12 @@ export function ActionList({ postActions }: ActionListProps) {
   }, []);
 
   return (
-    <div className="flex justify-between w-full mt-2 text-gray-500 font-semibold">
-      {postActions.map((item, index) => (
+    <div className="mt-2 flex w-full justify-between font-semibold text-gray-500">
+      {actions.map((item, index) => (
         <ActionItem
           key={item.name}
           item={item}
+          entityId={entityId}
           isHovered={hoveredIndex === index}
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={handleMouseLeave}

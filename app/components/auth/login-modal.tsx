@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useFetcher } from "@remix-run/react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
@@ -14,7 +15,12 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { login } from "~/services/auth";
+
+import { useAuthStore } from "~/store/auth";
+
+import type { User } from "~/types/user";
+import type { ApiResponseUnion } from "~/types";
+import { isApiResponse } from "~/lib/api-utils";
 
 type Props = {
   visible: boolean;
@@ -22,11 +28,15 @@ type Props = {
 };
 
 export function LoginModal({ visible, onChange }: Props) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const fetcher = useFetcher();
+
+  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const username = form.username.value;
+    const password = form.password.value;
 
     if (!username || !password) {
       toast.error("Username and password are required");
@@ -38,22 +48,31 @@ export function LoginModal({ visible, onChange }: Props) {
       return;
     }
 
-    try {
-      await login({ username, password });
-    } catch (error) {
-      toast.error(String(error));
-    } finally {
-      onChange(false);
-    }
+    fetcher.submit(
+      { username, password },
+      { method: "post", action: "/auth/login" },
+    );
   }
+
+  useEffect(() => {
+    if (fetcher.data) {
+      const data = fetcher.data as ApiResponseUnion<User>;
+
+      if (isApiResponse(data)) {
+        setCurrentUser(data.data);
+      } else {
+        toast.error(data.message);
+      }
+    }
+  }, [setCurrentUser, fetcher.data]);
 
   return (
     <Dialog open={visible} onOpenChange={onChange}>
       <DialogTrigger>
         <div className="sr-only" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-black text-whiteh">
-        <form className="sm:max-w-md space-y-4" onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-md">
+        <form className="space-y-4 sm:max-w-md" onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Login</DialogTitle>
             <DialogDescription>
@@ -65,10 +84,10 @@ export function LoginModal({ visible, onChange }: Props) {
             <Input
               id="username"
               type="text"
+              name="username"
+              defaultValue={"admin"}
               placeholder="Username"
               className="w-full"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div>
@@ -76,18 +95,18 @@ export function LoginModal({ visible, onChange }: Props) {
             <Input
               id="password"
               type="password"
+              defaultValue={"Admin123!@#"}
+              name="password"
               placeholder="Password"
               className="w-full"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <DialogFooter className="justify-end mt-10">
+          <DialogFooter className="mt-10 justify-end">
             <DialogClose asChild>
               <Button
                 type="button"
                 variant="ghost"
-                className="hover:bg-opacity-20 hover:bg-zinc-700 hover:text-white"
+                className="hover:bg-zinc-700 hover:bg-opacity-20"
                 onClick={() => onChange(false)}
               >
                 Close

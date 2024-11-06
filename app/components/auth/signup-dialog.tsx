@@ -73,7 +73,7 @@ export function SignupModal({ visible, onChange }: Props) {
       <DialogTrigger>
         <div className="sr-only" />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-black text-whiteh">
+      <DialogContent className="sm:max-w-md ">
         <form className="sm:max-w-md space-y-4" onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Sign Up</DialogTitle>
@@ -130,7 +130,7 @@ export function SignupModal({ visible, onChange }: Props) {
               <Button
                 type="button"
                 variant="ghost"
-                className="hover:bg-opacity-20 hover:bg-zinc-700 hover:text-white"
+                className="hover:bg-opacity-20 hover:bg-zinc-700"
                 onClick={() => onChange(false)}
               >
                 Close

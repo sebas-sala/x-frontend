@@ -12,7 +12,7 @@ import {
 import { links } from "~/data/navigation";
 import { PostButton } from "../post/post-button";
 import { LoginModal } from "~/components/auth/login-modal";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SignupModal } from "../auth/signup-dialog";
 import { useAuthStore } from "~/store/auth";
 
@@ -43,13 +43,33 @@ export default function NavigationAside() {
     }, 250);
   }, [visibleLoginModal, visibleSignUpModal]);
 
+  const filteredLinks = useMemo(() => {
+    return links.filter((item) => {
+      if (item.name.toLowerCase() === "profile") {
+        if (!currentUser) return null;
+      }
+
+      return item;
+    });
+  }, [currentUser]);
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="sticky top-0 flex h-full max-h-dvh flex-col p-4">
       <div>
         <ul className="space-y-2">
-          {links.map((item) => {
+          {filteredLinks.map((item) => {
             if (item.name.toLowerCase() === "profile") {
-              if (!currentUser) return null;
+              return (
+                <li key={item.name}>
+                  <NavigationLink
+                    to={`/${currentUser?.username}`}
+                    isActive={location.pathname === item.href}
+                  >
+                    {item.icon}
+                    <span>{item.name}</span>
+                  </NavigationLink>
+                </li>
+              );
             }
 
             return (
@@ -71,10 +91,7 @@ export default function NavigationAside() {
       </div>
       <div className="mt-auto">
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="flex items-center justify-center w-10 h-10 rounded-full border-0 ring-0
-            bg-gray-800"
-          >
+          <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-800 ring-0">
             <Avatar>
               <AvatarImage src={avatarUrl} />
               modal <AvatarFallback>CN</AvatarFallback>
