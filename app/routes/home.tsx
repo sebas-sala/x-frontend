@@ -4,106 +4,85 @@ import { json, useLoaderData } from "@remix-run/react";
 import { PostList } from "~/components/post/post-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import type { Post } from "~/types/post";
+import { getPosts } from "~/services/post";
+
+import type { Post, PostApiResponseList } from "~/types/post";
 import type { LoaderFunction } from "@remix-run/node";
-import type { PaginatedResult } from "~/types";
+import { getSession } from "~/sessions";
 
-export const loader: LoaderFunction = async () => {
-  const postsResponse = await fetch(`${process.env.VITE_API_URL}/posts`);
-  const postsJson = await postsResponse.json();
+export const loader: LoaderFunction = async ({ request }) => {
+  const session = await getSession(request);
+  const token = session.get("token");
 
-  const postsByFollowingsResponse = await fetch(
-    `${process.env.VITE_API_URL}/posts?by_following=true`
-  );
-  const postsByFollowingsJson = await postsByFollowingsResponse.json();
+  try {
+    const [posts, postsByFollowing] = await Promise.all([
+      getPosts({
+        token,
+      }),
+      getPosts({ filters: [{ by_following: true }], token }),
+    ]);
 
-  return json({
-    postsJson,
-    postsByFollowingsJson,
-  });
+    return json({
+      posts: posts || [],
+      postsByFollowing: postsByFollowing || [],
+    });
+  } catch (error) {
+    return json({ posts: [], postsByFollowing: [] });
+  }
 };
 
 export default function Home() {
-  const { postsJson, postsByFollowingsJson } = useLoaderData<{
-    postsJson: PaginatedResult<Post>;
-    postsByFollowingsJson: PaginatedResult<Post>;
-  }>();
+  const { posts, postsByFollowing } = useLoaderData<typeof loader>();
 
-  const [postsFypResponse, setPostsFypResponse] = useState<
-    PaginatedResult<Post>
-  >(postsJson as PaginatedResult<Post>);
-
-  const [postsFollowingResponse, setPostsFollowingResponse] = useState<
-    PaginatedResult<Post>
-  >(postsByFollowingsJson as PaginatedResult<Post>);
-
-  const fetchMorePosts = async (
-    page: number,
-    filters?: Record<string, string | number | boolean>[]
-  ) => {
-    const url = new URL(`${import.meta.env.VITE_API_URL}/posts`);
-
-    if (filters) {
-      filters.forEach((filter) => {
-        Object.entries(filter).forEach(([key, value]) => {
-          url.searchParams.append(key, value.toString());
-        });
-      });
-    }
-
-    url.searchParams.append("page", page.toString());
-
-    const response = await fetch(url.toString());
-    const posts: PaginatedResult<Post> = await response.json();
-
-    return posts;
-  };
+  const [postsFypResponse, setPostsFypResponse] = useState<PostApiResponseList>(
+    posts as PostApiResponseList,
+  );
+  const [postsFollowingResponse, setPostsFollowingResponse] =
+    useState<PostApiResponseList>(postsByFollowing as PostApiResponseList);
 
   const fetchMoreFypPosts = async (page: number) => {
-    const res = await fetchMorePosts(page);
-    setPostsFypResponse(res);
+    try {
+      const res = await getPosts({
+        page,
+      });
+      setPostsFypResponse(res);
 
-    return res;
+      return res.data;
+    } catch (e) {
+      return [];
+    }
   };
 
   const fetchMorePostsByFollowings = async (page: number) => {
-    const res = await fetchMorePosts(page, [{ by_following: true }]);
-    console.log(res.data.map((post) => post.id));
-    setPostsFollowingResponse(res);
+    const res = await getPosts({ page, filters: [{ by_following: true }] });
+    setPostsFollowingResponse(res as PostApiResponseList);
 
-    return res;
+    return res?.data;
   };
 
   return (
     <main className="relative flex min-h-screen flex-col">
       <div className="relative">
-        <Tabs defaultValue="fyp" className="w-full rounded-none relative">
-          <TabsList className="rounded-none w-full bg-transparent px-0 h-full sticky top-0 border-b">
-            <TabsTrigger
-              value="fyp"
-              className="flex-1 hover:bg-gray-950 rounded-none py-0 h-12 hover:text-gray-50"
-            >
+        <Tabs defaultValue="fyp" className="relative w-full rounded-none">
+          <TabsList className="sticky top-0 h-full w-full rounded-none px-0">
+            <TabsTrigger value="fyp" className="h-12 flex-1 rounded-none">
               For you
             </TabsTrigger>
-            <TabsTrigger
-              value="following"
-              className="flex-1 hover:bg-gray-950 rounded-none hover:text-gray-50 h-12 active:bg-gray-950 active:text-gray-50
-            "
-            >
+            <TabsTrigger value="following" className="h-12 flex-1 rounded-none">
               Following
             </TabsTrigger>
           </TabsList>
           <TabsContent value="fyp">
             <PostList
               posts={postsFypResponse.data as Post[]}
-              pagination={postsFypResponse.meta.pagination}
+              pagination={postsFypResponse.meta?.pagination}
               fetchMore={fetchMoreFypPosts}
             />
           </TabsContent>
           <TabsContent value="following">
             <PostList
               posts={postsFollowingResponse.data as Post[]}
-              pagination={postsFollowingResponse.meta.pagination}
+              pagination={postsFollowingResponse.meta?.pagination}
               fetchMore={fetchMorePostsByFollowings}
             />
           </TabsContent>
