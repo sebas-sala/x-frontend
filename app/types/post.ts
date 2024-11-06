@@ -1,5 +1,6 @@
 import type { Like } from "~/types/like";
 import type { User } from "~/types/user";
+import { ApiResponse, ApiResponseList } from ".";
 
 export interface Post {
   id: string;
@@ -10,3 +11,6 @@ export interface Post {
   comments?: Comment[];
   likes?: Like[];
 }
+
+export type PostApiResponse = ApiResponse<Post>;
+export type PostApiResponseList = ApiResponseList<Post>;

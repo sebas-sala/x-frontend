@@ -5,6 +5,7 @@ import type { Follow } from "~/types/follow";
 import type { Profile } from "~/types/profle";
 import type { Message } from "~/types/message";
 import type { BlockedUser } from "~/types/blocked-user";
+import type { ApiResponse, ApiResponseList } from ".";
 
 export interface User {
   id: string;
@@ -14,6 +15,7 @@ export interface User {
   updatedAt: string;
   username: string;
   password: string;
+  isFollowed?: boolean;
   profile: Profile;
   posts?: Post[];
   likes?: Like[];
@@ -26,3 +28,6 @@ export interface User {
   blockedUsers?: BlockedUser[];
   notifications?: Notification[];
 }
+
+export type UserApiResponse = ApiResponse<User>;
+export type UserApiResponseList = ApiResponseList<User>;
