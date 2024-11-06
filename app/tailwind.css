@@ -2,18 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
-
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
-
-  background-color: black;
-  color: white;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -77,4 +65,10 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.scrollbar-hidden {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
