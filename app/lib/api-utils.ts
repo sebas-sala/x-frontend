@@ -15,10 +15,17 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     const error = await response.json();
+
     throw new ApiError(error);
   }
 
-  return response.json();
+  const contentType = response.headers.get("content-type");
+
+  if (contentType?.includes("application/json")) {
+    return response.json();
+  } else {
+    return {} as T;
+  }
 }
 
 export async function handleApiFetchError<T>(

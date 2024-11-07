@@ -10,6 +10,9 @@ export interface Post {
   user: User;
   comments?: Comment[];
   likes?: Like[];
+  isLiked?: boolean;
+  likesCount?: number;
+  isBookmarked?: boolean;
 }
 
 export type PostApiResponse = ApiResponse<Post>;

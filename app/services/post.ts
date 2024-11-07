@@ -39,5 +39,16 @@ export async function getPosts({
 
 export async function likePost(postId: string) {
   const url = `${import.meta.env.VITE_API_URL}/posts/${postId}/likes`;
-  return apiFetch<PostApiResponse>(url, { method: "POST" });
+  return apiFetch<PostApiResponse>(url, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function unlikePost(postId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/posts/${postId}/likes`;
+  return await apiFetch<PostApiResponse>(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
 }

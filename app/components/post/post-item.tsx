@@ -1,6 +1,15 @@
 import { useCallback, useState } from "react";
 import { Link } from "@remix-run/react";
-import { BanIcon, UserIcon, EllipsisIcon, FrownIcon } from "lucide-react";
+import {
+  BanIcon,
+  UserIcon,
+  EllipsisIcon,
+  FrownIcon,
+  Heart,
+  Bookmark,
+  BarChart2,
+  MessageCircle,
+} from "lucide-react";
 
 import { ActionList } from "./action-list";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -22,16 +31,18 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-import { usePostStore } from "~/store/post";
-import { useUserStore } from "~/store/user";
-
-import { wait } from "~/lib/utils";
+import { cn, wait } from "~/lib/utils";
 import { formatPostDate } from "~/lib/date-utils";
 
 import type { Post } from "~/types/post";
+import { ApiError } from "~/lib/api-utils";
 
 interface Props {
   post: Post;
+  follow: (id: string) => Promise<void>;
+  unfollow: (id: string) => Promise<void>;
+  like: (id: string) => Promise<void>;
+  unlike: (id: string) => Promise<void>;
   onClick?: () => void;
 }
 
@@ -42,14 +53,81 @@ interface DropdownItem {
   action?: () => void;
 }
 
-export function PostItem({ post, onClick }: Props) {
+export interface ActionProps {
+  name: string;
+  icon: () => JSX.Element;
+  count?: number;
+  className?: string;
+  handleAction?: (entityId: string) => Promise<void> | void;
+}
+
+export function PostItem({
+  post,
+  follow,
+  unfollow,
+  like,
+  unlike,
+  onClick,
+}: Props) {
   const { user } = post;
 
   const [isFollowed, setIsFollowed] = useState(user.isFollowed);
+  const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
+  const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
+
   const [alertOpen, setAlertOpen] = useState(false);
 
-  const follow = useUserStore().follow;
-  const unfollow = useUserStore().unfollow;
+  const actions: ActionProps[] = [
+    {
+      name: "Comment",
+      icon: () => <MessageCircle size={16} />,
+    },
+    {
+      name: "Likes",
+      count: likesCount,
+      icon: () => (
+        <Heart
+          size={16}
+          className={cn(
+            "transition-all duration-200",
+            isLiked ? "fill-current text-red-500" : "",
+          )}
+        />
+      ),
+      className: isLiked ? "text-red-500" : "",
+      handleAction: async (entityId: string) => {
+        try {
+          setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
+          setIsLiked((prev) => !prev);
+          isLiked ? await unlike(entityId) : like(entityId);
+        } catch (error) {
+          if (error instanceof ApiError) {
+            if (error.status === 404) return;
+          }
+
+          setLikesCount((prev) => (isLiked ? prev + 1 : prev - 1));
+          setIsLiked((prev) => !prev);
+        }
+      },
+    },
+    {
+      name: "Views",
+      icon: () => <BarChart2 size={16} />,
+    },
+    {
+      name: isBookmarked ? "Unbookmark" : "Bookmark",
+      icon: () => (
+        <Bookmark
+          size={16}
+          className={cn(
+            "transition-all duration-200",
+            isBookmarked ? "fill-current text-blue-500" : "",
+          )}
+        />
+      ),
+    },
+  ];
 
   const handleFollowToggle = useCallback(async () => {
     setIsFollowed((prev) => !prev);
@@ -93,6 +171,7 @@ export function PostItem({ post, onClick }: Props) {
       <PostContent
         post={post}
         dropdownItems={dropdownItems}
+        actions={actions}
         onClick={onClick}
       />
 
@@ -107,19 +186,19 @@ export function PostItem({ post, onClick }: Props) {
 interface PostContentProps {
   post: Post;
   dropdownItems: DropdownItem[];
+  actions: ActionProps[];
   onClick?: () => void;
 }
 
 export function PostContent({
   post,
+  actions,
   dropdownItems,
   onClick,
 }: PostContentProps) {
   const { user } = post;
 
   const formattedDate = formatPostDate(new Date(post.createdAt));
-
-  const actions = usePostStore().actions;
 
   return (
     <div

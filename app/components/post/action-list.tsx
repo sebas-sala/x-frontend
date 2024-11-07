@@ -2,8 +2,7 @@ import { useState, useCallback, type SetStateAction } from "react";
 
 import { cn } from "~/lib/utils";
 import { getActionColorName, getActionIconColor } from "~/lib/color-utils";
-
-import type { ActionProps } from "~/types/actions";
+import { ActionProps } from "./post-item";
 
 interface ActionItemProps {
   item: ActionProps;
@@ -57,7 +56,7 @@ const ActionItem = ({
           [colorName]: isHovered,
         })}
       >
-        {item.name}
+        {item.count}
       </span>
     </div>
   );

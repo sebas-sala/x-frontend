@@ -3,23 +3,39 @@ import { useInfiniteScroll } from "react-continous-scroll";
 
 import { PostItem } from "./post-item";
 
+import { useUserStore } from "~/store/user";
+import { usePostStore } from "~/store/post";
+
 import type { Post } from "~/types/post";
 import type { Pagination } from "~/types";
 
 interface Props {
   posts: Post[];
+  initialData: Post[];
   pagination: Pagination;
   fetchMore: (page: number) => Promise<Post[]>;
   maxPage?: number;
 }
 
-export function PostList({ posts, pagination, fetchMore, maxPage }: Props) {
-  const { data, loadMoreRef, loading, loadMore } = useInfiniteScroll({
-    initialData: posts,
+export function PostList({
+  posts,
+  initialData,
+  pagination,
+  fetchMore,
+  maxPage,
+}: Props) {
+  const { loadMoreRef, loading, loadMore } = useInfiniteScroll({
+    initialData,
     loadMore: pagination?.hasNextPage,
     onLoadMore: () => fetchMore(pagination.page + 1),
     maxPage,
   });
+
+  const follow = useUserStore().follow;
+  const unfollow = useUserStore().unfollow;
+
+  const like = usePostStore().like;
+  const unlike = usePostStore().unlike;
 
   async function onClick() {
     console.log("clicked");
@@ -28,8 +44,16 @@ export function PostList({ posts, pagination, fetchMore, maxPage }: Props) {
   return (
     <>
       <ul>
-        {data.map((post) => (
-          <PostItem key={post.id} post={post} onClick={onClick} />
+        {posts.map((post) => (
+          <PostItem
+            key={post.id}
+            post={post}
+            follow={follow}
+            unfollow={unfollow}
+            like={like}
+            unlike={unlike}
+            onClick={onClick}
+          />
         ))}
       </ul>
 
