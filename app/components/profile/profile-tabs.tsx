@@ -54,12 +54,11 @@ export function ProfileTabs({
         ))}
       </TabsList>
 
-      <TabsContent value="posts">
+      <TabsContent value="posts" className="px-0">
         <PostList
-          posts={postsResponse.data}
+          initialData={postsResponse.data}
           pagination={postsPagination}
           fetchMore={fetchMorePosts}
-          maxPage={10}
         />
       </TabsContent>
       <TabsContent value="likes">Likes</TabsContent>

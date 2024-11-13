@@ -10,10 +10,10 @@ import type { Post } from "~/types/post";
 import type { Pagination } from "~/types";
 
 interface Props {
-  posts: Post[];
   initialData: Post[];
   pagination: Pagination;
   fetchMore: (page: number) => Promise<Post[]>;
+  posts?: Post[];
   maxPage?: number;
 }
 
@@ -24,7 +24,7 @@ export function PostList({
   fetchMore,
   maxPage,
 }: Props) {
-  const { loadMoreRef, loading, loadMore } = useInfiniteScroll({
+  const { data, loadMoreRef, loading, loadMore } = useInfiniteScroll({
     initialData,
     loadMore: pagination?.hasNextPage,
     onLoadMore: () => fetchMore(pagination.page + 1),
@@ -37,32 +37,39 @@ export function PostList({
   const like = usePostStore().like;
   const unlike = usePostStore().unlike;
 
-  async function onClick() {
-    console.log("clicked");
-  }
-
   return (
     <>
       <ul>
-        {posts.map((post) => (
-          <PostItem
-            key={post.id}
-            post={post}
-            follow={follow}
-            unfollow={unfollow}
-            like={like}
-            unlike={unlike}
-            onClick={onClick}
-          />
-        ))}
+        {posts && posts.length > 0
+          ? posts.map((post: Post) => (
+              <PostItem
+                key={post.id}
+                post={post}
+                follow={follow}
+                unfollow={unfollow}
+                like={like}
+                unlike={unlike}
+              />
+            ))
+          : data.map((post: Post) => (
+              <PostItem
+                key={post.id}
+                post={post}
+                follow={follow}
+                unfollow={unfollow}
+                like={like}
+                unlike={unlike}
+              />
+            ))}
       </ul>
-
-      <div ref={loadMoreRef} className="my-10 flex justify-center">
-        {loading && <Loader size={32} className="animate-spin" />}
-        {!loading && !loadMore && (
-          <p className="text-gray-500">No more posts to load</p>
-        )}
-      </div>
+      {!loading && loadMore && (
+        <div ref={loadMoreRef} className="my-10 flex justify-center">
+          {loading && <Loader size={32} className="animate-spin" />}
+          {!loading && !loadMore && (
+            <p className="text-gray-500">No more posts to load</p>
+          )}
+        </div>
+      )}
     </>
   );
 }

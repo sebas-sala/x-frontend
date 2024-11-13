@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Link } from "@remix-run/react";
+import { Link, useNavigate } from "@remix-run/react";
 import {
   BanIcon,
   UserIcon,
@@ -31,11 +31,13 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
+import { useAuthStore } from "~/store/auth";
+
 import { cn, wait } from "~/lib/utils";
+import { ApiError } from "~/lib/api-utils";
 import { formatPostDate } from "~/lib/date-utils";
 
 import type { Post } from "~/types/post";
-import { ApiError } from "~/lib/api-utils";
 
 interface Props {
   post: Post;
@@ -43,7 +45,7 @@ interface Props {
   unfollow: (id: string) => Promise<void>;
   like: (id: string) => Promise<void>;
   unlike: (id: string) => Promise<void>;
-  onClick?: () => void;
+  datePosition?: "top" | "bottom";
 }
 
 interface DropdownItem {
@@ -67,8 +69,12 @@ export function PostItem({
   unfollow,
   like,
   unlike,
-  onClick,
+  datePosition = "top",
 }: Props) {
+  const navigate = useNavigate();
+
+  const currentUser = useAuthStore().currentUser;
+
   const { user } = post;
 
   const [isFollowed, setIsFollowed] = useState(user.isFollowed);
@@ -100,7 +106,7 @@ export function PostItem({
         try {
           setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
           setIsLiked((prev) => !prev);
-          isLiked ? await unlike(entityId) : like(entityId);
+          isLiked ? await unlike(entityId) : await like(entityId);
         } catch (error) {
           if (error instanceof ApiError) {
             if (error.status === 404) return;
@@ -146,6 +152,10 @@ export function PostItem({
     });
   };
 
+  const handleBlock = () => {
+    window.alert("Blocked!");
+  };
+
   const dropdownItems: DropdownItem[] = [
     {
       id: "follow",
@@ -164,125 +174,136 @@ export function PostItem({
       icon: FrownIcon,
       text: `Not interested in this post`,
     },
-  ];
+  ].filter(
+    (item) =>
+      (item.id !== "block" && item.id !== "follow" && item.id !== "ignore") ||
+      currentUser?.id !== user.id,
+  );
+
+  const formattedDate = formatPostDate(new Date(post.createdAt));
 
   return (
-    <li>
-      <PostContent
-        post={post}
-        dropdownItems={dropdownItems}
-        actions={actions}
-        onClick={onClick}
-      />
+    <li className="list-none transition hover:bg-gray-100">
+      <div
+        onClick={() => navigate(`/${user.username}/${post.id}`)}
+        onKeyDown={() => navigate(`/${user.username}/${post.id}`)}
+        tabIndex={0}
+        role="button"
+        className="flex gap-4 border-b p-4"
+      >
+        <div>
+          <Link
+            to={`/${user.username}`}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Avatar>
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </Link>
+        </div>
+        <div className="flex-1">
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <Link
+                to={`/${user.username}`}
+                className="flex flex-row space-x-2"
+                onClick={(event) => event.stopPropagation()}
+              >
+                {datePosition === "top" ? (
+                  <span className="flex gap-3">
+                    <p className="font-bold">{user.name}</p>
+                    <span className="flex gap-1 text-gray-500">
+                      <span>{user.username}</span>
+
+                      <span className="font-black">·</span>
+                      <span>{formattedDate}</span>
+                    </span>
+                  </span>
+                ) : (
+                  <span>
+                    <p className="font-bold">{user.name}</p>
+                    <p className="block text-gray-500">{user.username}</p>
+                  </span>
+                )}
+              </Link>
+              {dropdownItems.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <EllipsisIcon className="cursor-pointer" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {dropdownItems.map((item, index) => {
+                      return (
+                        <DropdownMenuItem
+                          key={index}
+                          className="flex cursor-pointer items-center"
+                          onClick={(e) => {
+                            item.action?.();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <item.icon className="mr-2" size={16} />
+                          {item.text}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+
+            <div className="py-2 pt-6">
+              <p className="">{post.content}</p>
+            </div>
+
+            {/* <div className="my-2 rounded-xl border h-[400px]">hola</div> */}
+
+            <div className="mt-2 flex w-full justify-between font-semibold text-gray-500">
+              <ActionList entityId={post.id} actions={actions} />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <BlockAlertDialog
+        username={user.username}
         open={alertOpen}
         onOpenChange={handleBlockAlertChange}
+        onClick={handleBlock}
       />
     </li>
   );
 }
 
-interface PostContentProps {
-  post: Post;
-  dropdownItems: DropdownItem[];
-  actions: ActionProps[];
-  onClick?: () => void;
-}
-
-export function PostContent({
-  post,
-  actions,
-  dropdownItems,
-  onClick,
-}: PostContentProps) {
-  const { user } = post;
-
-  const formattedDate = formatPostDate(new Date(post.createdAt));
-
-  return (
-    <div
-      tabIndex={0}
-      role="button"
-      onClick={onClick}
-      onKeyDown={onClick}
-      className="flex gap-4 border-b p-4"
-    >
-      <div>
-        <Link to={`/${user.username}`}>
-          <Avatar>
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-        </Link>
-      </div>
-      <div className="flex-1">
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between">
-            <Link to={`/${user.username}`} className="flex flex-row space-x-2">
-              <p className="font-bold">{user.name}</p>
-              <p className="space-x-1 text-gray-500">
-                <span>{user.username}</span>
-                <span className="font-black">·</span>
-                <span>{formattedDate}</span>
-              </p>
-            </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <EllipsisIcon className="cursor-pointer" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {dropdownItems.map((item, index) => {
-                  return (
-                    <DropdownMenuItem
-                      key={index}
-                      className="flex cursor-pointer items-center"
-                      onClick={item.action}
-                    >
-                      <item.icon className="mr-2" size={16} />
-                      {item.text}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <p className="">{post.content}</p>
-
-          {/* <div className="my-2 rounded-xl border h-[400px]">hola</div> */}
-
-          <div className="mt-2 flex w-full justify-between font-semibold text-gray-500">
-            <ActionList entityId={post.id} actions={actions} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 interface BlockAlertDialogProps {
+  username: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClick: () => void;
 }
 
 export function BlockAlertDialog({
+  username,
   open,
   onOpenChange,
+  onClick,
 }: BlockAlertDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogTrigger className="flex cursor-pointer items-center"></AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Are you sure you want to block @{username}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            You won&apos;t see their posts and they won&apos;t be able to see
+            your posts.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={onClick}>Block</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

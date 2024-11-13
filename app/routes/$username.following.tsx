@@ -9,43 +9,35 @@ import {
 import { ArrowLeftIcon } from "lucide-react";
 
 import { FollowList } from "~/components/follow/follow-list";
-import { useShadow } from "~/hooks/use-shadow";
-import { cn } from "~/lib/utils";
 
-import { getFollowers } from "~/services/user";
-import { getSession } from "~/sessions";
+import { getFollowers, getFollowing } from "~/services/user";
+
+import { cn } from "~/lib/utils";
+import { useShadow } from "~/hooks/use-shadow";
 
 import type { User } from "~/types/user";
 
-export const loader = async ({
-  request,
-  params,
-}: {
-  request: Request;
-  params: { username: string };
-}) => {
+export const loader = async ({ params }: { params: { username: string } }) => {
   try {
-    const session = await getSession(request);
-    const token = session.get("token");
+    if (!params.username) {
+      return redirect("/home");
+    }
 
-    const followersResponse = await getFollowers({
-      username: params.username,
-      token,
-    });
+    const followersResponse = await getFollowing({ username: params.username });
 
     return json({ followersResponse });
-  } catch {
-    redirect("/home?error=profile_not_found");
+  } catch (error) {
+    return redirect("/home?error=profile_not_found");
   }
 };
 
-export default function Followers() {
+export default function Following() {
   const { username } = useParams();
   const navigate = useNavigate();
 
-  const { isShadow } = useShadow();
-
   const { followersResponse } = useLoaderData<typeof loader>();
+
+  const { isShadow } = useShadow();
 
   if (!username) {
     return navigate("/home");
@@ -61,7 +53,7 @@ export default function Followers() {
   };
 
   return (
-    <main className="relative flex min-h-screen w-full flex-col p-1">
+    <main className="relative flex min-h-screen w-full flex-col">
       <section
         className={cn(
           "transition-shadow duration-300",
@@ -82,18 +74,11 @@ export default function Followers() {
         </div>
       </section>
       <div className="px-1">
-        {followersResponse.data.length ? (
-          <FollowList
-            users={followersResponse.data as User[]}
-            pagination={followersResponse.meta?.pagination}
-            fetchMore={handleFetchMoreFollowers}
-          />
-        ) : (
-          <div className="py-10 text-center">
-            <span className="font-bold">@{username} </span> does not have
-            followers
-          </div>
-        )}
+        <FollowList
+          users={followersResponse.data as User[]}
+          pagination={followersResponse.meta?.pagination}
+          fetchMore={handleFetchMoreFollowers}
+        />
       </div>
     </main>
   );

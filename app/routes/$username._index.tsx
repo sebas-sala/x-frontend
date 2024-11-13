@@ -19,13 +19,23 @@ import { useAuthStore } from "~/store/auth";
 
 import type { Post } from "~/types/post";
 import type { User } from "~/types/user";
-import type { ApiResponse, ApiResponseList } from "~/types";
+import type { ApiResponseList } from "~/types";
+import { getSession } from "~/sessions";
 
-export const loader = async ({ params }: { params: { username: string } }) => {
+export const loader = async ({
+  params,
+  request,
+}: {
+  params: { username: string };
+  request: Request;
+}) => {
   try {
+    const session = await getSession(request);
+    const token = session.get("token");
+
     const [profileResponse, postsResponse] = await Promise.all([
-      getProfile(params.username),
-      getPosts({ filters: [{ by_username: params.username }] }),
+      getProfile({ username: params.username, token }),
+      getPosts({ filters: [{ by_username: params.username }], token }),
     ]);
 
     return json({ profileResponse, postsResponse });
@@ -38,10 +48,7 @@ export default function Profile() {
   const { username } = useParams();
   const navigate = useNavigate();
 
-  const { profileResponse, postsResponse } = useLoaderData<{
-    profileResponse: ApiResponse<User>;
-    postsResponse: ApiResponseList<Post>;
-  }>();
+  const { profileResponse, postsResponse } = useLoaderData<typeof loader>();
 
   const currentUser = useAuthStore().currentUser;
 
@@ -59,26 +66,24 @@ export default function Profile() {
     <main className="scrollbar-hidden relative flex min-h-screen w-full flex-col">
       <div className="h-48 bg-gray-100" />
 
-      <div className="px-6">
-        <div className="relative flex justify-between py-4">
-          <Avatar className="-mt-24 h-40 w-40 border-4 border-black">
-            <AvatarFallback>{username}</AvatarFallback>
-          </Avatar>
+      <div className="relative flex justify-between px-6 py-4">
+        <Avatar className="-mt-24 h-40 w-40 border-4 border-black">
+          <AvatarFallback>{username}</AvatarFallback>
+        </Avatar>
 
-          {isOwner && (
-            <Button className="ml-auto rounded-full border py-6 text-xl font-semibold">
-              Edit Profile
-            </Button>
-          )}
-        </div>
-
-        <ProfileInfo profile={profile} />
-        <ProfileTabs
-          isOwner={isOwner}
-          username={username}
-          postsResponse={postsResponse as ApiResponseList<Post>}
-        />
+        {isOwner && (
+          <Button className="ml-auto rounded-full border py-6 text-xl font-semibold">
+            Edit Profile
+          </Button>
+        )}
       </div>
+
+      <ProfileInfo profile={profile} />
+      <ProfileTabs
+        isOwner={isOwner}
+        username={username}
+        postsResponse={postsResponse as ApiResponseList<Post>}
+      />
 
       <Outlet />
     </main>

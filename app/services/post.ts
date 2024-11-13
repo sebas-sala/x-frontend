@@ -15,6 +15,23 @@ export async function createPost({ content }: { content: string }) {
   });
 }
 
+export async function getPost({
+  postId,
+  token,
+}: {
+  postId: string;
+  token?: string;
+}): Promise<PostApiResponse> {
+  const url = `${import.meta.env.VITE_API_URL}/posts/${postId}`;
+
+  return apiFetch<PostApiResponse>(url, {
+    method: "GET",
+    headers: {
+      Cookie: `token=${token}`,
+    },
+  });
+}
+
 export async function getPosts({
   page = 1,
   token,

@@ -1,6 +1,4 @@
-import { Session, SessionData } from "@remix-run/node";
 import { apiFetch } from "~/lib/api-utils";
-import { commitSession } from "~/sessions";
 
 import type { UserApiResponse, UserApiResponseList } from "~/types/user";
 
@@ -10,6 +8,20 @@ export async function getUser(userId: string) {
     method: "GET",
     credentials: "include",
   });
+}
+
+export async function getUserByUsername(username: string) {
+  try {
+    const url = `${import.meta.env.VITE_API_URL}/users/${username}`;
+    return apiFetch<UserApiResponse>(url, {
+      method: "GET",
+      credentials: "include",
+    });
+  } catch (error) {
+    return {
+      data: null,
+    };
+  }
 }
 
 export async function getUsers({
@@ -42,19 +54,55 @@ export async function getUsers({
   });
 }
 
-export async function getFollowers(username: string) {
-  const url = `${import.meta.env.VITE_API_URL}/users/${username}/followers`;
+export async function getFollowers({
+  username,
+  page,
+  token,
+}: {
+  username: string;
+  page?: number;
+  token?: string;
+}) {
+  const url = new URL(
+    `${import.meta.env.VITE_API_URL}/users/${username}/followers`,
+  );
+
+  if (page) {
+    url.searchParams.append("page", page.toString());
+  }
+
   return apiFetch<UserApiResponseList>(url, {
     method: "GET",
     credentials: "include",
+    headers: {
+      Cookie: `token=${token}`,
+    },
   });
 }
 
-export async function getFollowing(username: string) {
-  const url = `${import.meta.env.VITE_API_URL}/users/${username}/following`;
+export async function getFollowing({
+  username,
+  page,
+  token,
+}: {
+  username: string;
+  page?: number;
+  token?: string;
+}) {
+  const url = new URL(
+    `${import.meta.env.VITE_API_URL}/users/${username}/following`,
+  );
+
+  if (page) {
+    url.searchParams.append("page", page.toString());
+  }
+
   return apiFetch<UserApiResponseList>(url, {
     method: "GET",
     credentials: "include",
+    headers: {
+      Cookie: `token=${token}`,
+    },
   });
 }
 

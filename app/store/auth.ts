@@ -4,24 +4,24 @@ import { createSelectors } from ".";
 
 type State = {
   isLogged: boolean;
-  currentUser: User | null;
+  currentUser?: User;
 };
 
 type Actions = {
   logout: () => void;
   login: (user: User) => void;
-  setCurrentUser: (user: User) => void;
+  setCurrentUser: (user: User | undefined) => void;
   setIsLogged: (isLogged: boolean) => void;
 };
 
 export const useAuth = create<State & Actions>((set) => ({
   isLogged: false,
   setIsLogged: (isLogged) => set({ isLogged }),
-  currentUser: null,
+  currentUser: undefined,
   setCurrentUser: (user) => set({ currentUser: user }),
 
   login: (user) => set({ currentUser: user }),
-  logout: () => set({ currentUser: null }),
+  logout: () => set({ currentUser: undefined }),
 }));
 
 export const useAuthStore = createSelectors(useAuth);

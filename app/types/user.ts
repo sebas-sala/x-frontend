@@ -21,7 +21,9 @@ export interface User {
   likes?: Like[];
   chats?: Chat[];
   followers?: Follow[];
+  followersCount?: number;
   following?: Follow[];
+  followingCount?: number;
   comments?: Comment[];
   messages?: Message[];
   blockedBy?: BlockedUser[];

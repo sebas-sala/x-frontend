@@ -7,6 +7,7 @@ import { Loader } from "../loader";
 import { useInfiniteScroll } from "react-continous-scroll";
 import { useUserStore } from "~/store/user";
 import { useState } from "react";
+import { useAuthStore } from "~/store/auth";
 
 type FollowListProps = {
   users: User[];
@@ -24,38 +25,51 @@ export function FollowList({ users, pagination, fetchMore }: FollowListProps) {
   const follow = useUserStore().follow;
   const unfollow = useUserStore().unfollow;
 
+  const currentUser = useAuthStore().currentUser;
+
   const handleFollow = async (userId: string, isFollowed?: boolean) => {
     isFollowed ? await unfollow(userId) : await follow(userId);
   };
 
+  console.log(users);
+
   return (
     <>
-      <ul className="space-y-2">
-        {data.map((user: User) => (
-          <UserFollowItem
-            key={user.id}
-            user={user}
-            handleFollow={handleFollow}
-          />
-        ))}
-      </ul>
+      {data.length === 0 ? (
+        <p className="text-center text-lg font-semibold">No users found</p>
+      ) : (
+        <>
+          <ul className="space-y-2">
+            {data.map((user: User) => (
+              <UserFollowItem
+                key={user.id}
+                user={user}
+                handleFollow={handleFollow}
+                currentUser={currentUser}
+              />
+            ))}
+          </ul>
 
-      <Loader
-        loaderType="pinwheel"
-        ref={loadMoreRef}
-        loading={loading}
-        loadMore={loadMore}
-      />
+          <Loader
+            loaderType="pinwheel"
+            ref={loadMoreRef}
+            loading={loading}
+            loadMore={loadMore}
+          />
+        </>
+      )}
     </>
   );
 }
 
 export function UserFollowItem({
   user,
+  currentUser,
   handleFollow,
 }: {
   user: User;
-  handleFollow?: (userId: string, isFollowed?: boolean) => void;
+  handleFollow: (userId: string, isFollowed?: boolean) => void;
+  currentUser?: User;
 }) {
   const [isFollowed, setIsFollowed] = useState(user.isFollowed);
 
@@ -63,33 +77,41 @@ export function UserFollowItem({
     setIsFollowed((prev) => !prev);
 
     try {
-      handleFollow?.(userId, isFollowed);
+      handleFollow(userId, isFollowed);
     } catch {
       setIsFollowed((prev) => !prev);
     }
   };
 
   return (
-    <li className="flex w-full flex-1 items-center justify-between p-2">
-      <div className="flex gap-4">
-        <Link to={`/${user.username}`}>
+    <li className="flex w-full flex-1 p-2">
+      <Link
+        to={`/${user.username}`}
+        className="flex w-full items-center justify-between"
+      >
+        <span className="flex gap-4">
           <Avatar>
             <AvatarFallback>{user.username}</AvatarFallback>
           </Avatar>
-        </Link>
-        <div>
-          <p className="text-xl font-black">{user.name}</p>
-          <p className="">{user.username}</p>
-        </div>
-      </div>
-      <div>
-        <Button
-          className="rounded-full border py-4 text-lg font-semibold"
-          onClick={() => onClick(user.id, isFollowed)}
-        >
-          {isFollowed ? "Unfollow" : "Follow"}
-        </Button>
-      </div>
+          <span>
+            <span className="block text-xl font-black">{user.name}</span>
+            <span className="">{user.username}</span>
+          </span>
+        </span>
+        {currentUser?.id !== user.id && (
+          <span>
+            <Button
+              className="rounded-full border py-4 text-lg font-semibold"
+              onClick={(e) => {
+                e.preventDefault();
+                onClick(user.id, isFollowed);
+              }}
+            >
+              {isFollowed ? "Unfollow" : "Follow"}
+            </Button>
+          </span>
+        )}
+      </Link>
     </li>
   );
 }

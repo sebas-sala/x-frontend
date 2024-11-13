@@ -12,8 +12,10 @@ export function ProfileInfo({ profile }: { profile: User }) {
     },
   );
 
+  console.log(profile);
+
   return (
-    <div className="mt-8">
+    <div className="mt-8 px-6">
       <h4 className="text-3xl font-black">{profile.name}</h4>
       <h5 className="text-xl text-gray-500">@{profile.username}</h5>
 
@@ -23,12 +25,12 @@ export function ProfileInfo({ profile }: { profile: User }) {
       </div>
 
       <div className="mt-4 flex gap-4 text-lg">
-        <Link to={`/${profile.username}/followers`} className="flex gap-2">
-          <p className="font-semibold">0</p>
+        <Link to={`/${profile.username}/following`} className="flex gap-2">
+          <p className="font-semibold">{profile.followingCount}</p>
           <p className="text-gray-500">Following</p>
         </Link>
-        <Link to={`/${profile.username}/following`} className="flex gap-2">
-          <p className="font-semibold">0</p>
+        <Link to={`/${profile.username}/followers`} className="flex gap-2">
+          <p className="font-semibold">{profile.followersCount}</p>
           <p className="text-gray-500">Followers</p>
         </Link>
       </div>

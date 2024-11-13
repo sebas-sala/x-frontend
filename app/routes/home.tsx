@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
@@ -46,15 +46,15 @@ export default function Home() {
   const setFypPosts = usePostStore().setFypPosts;
   const setFollowingPosts = usePostStore().setFollowingPosts;
 
-  useEffect(() => {
-    setFypPosts(postsFypResponse.data as Post[]);
-    setFollowingPosts(postsFollowingResponse.data as Post[]);
-  }, [
-    postsFypResponse,
-    postsFollowingResponse,
-    setFypPosts,
-    setFollowingPosts,
-  ]);
+  // useEffect(() => {
+  //   setFypPosts(postsFypResponse.data as Post[]);
+  //   setFollowingPosts(postsFollowingResponse.data as Post[]);
+  // }, [
+  //   postsFypResponse,
+  //   postsFollowingResponse,
+  //   setFypPosts,
+  //   setFollowingPosts,
+  // ]);
 
   const fetchMoreFypPosts = async (page: number) => {
     try {

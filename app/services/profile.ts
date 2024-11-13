@@ -1,15 +1,22 @@
-import { ApiResponseError } from "~/types";
-import { Profile } from "~/types/profle";
+import { apiFetch } from "~/lib/api-utils";
+import { ApiResponse } from "~/types";
 
-export async function getProfile(username: string) {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/users/${username}/profile`,
-  );
+import type { User } from "~/types/user";
 
-  if (!res.ok) {
-    const error = (await res.json()) as Promise<ApiResponseError>;
-    throw error;
-  }
+export async function getProfile({
+  username,
+  token,
+}: {
+  username: string;
+  token?: string;
+}): Promise<ApiResponse<User>> {
+  const url = `${import.meta.env.VITE_API_URL}/users/${username}/profile`;
 
-  return res.json() as Promise<Profile>;
+  return apiFetch<ApiResponse<User>>(url, {
+    method: "GET",
+    headers: {
+      Cookie: `token=${token}`,
+    },
+    credentials: "include",
+  });
 }

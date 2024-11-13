@@ -1,4 +1,4 @@
-import { useLocation } from "@remix-run/react";
+import { Link, useFetcher, useLocation } from "@remix-run/react";
 
 import NavigationLink from "./navigation-link";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -19,6 +19,7 @@ import { useAuthStore } from "~/store/auth";
 // import PostButton from "./PostButton";
 export default function NavigationAside() {
   const location = useLocation();
+  const fectcher = useFetcher();
 
   const avatarUrl = "https://github.com/shadcn.png";
 
@@ -26,6 +27,7 @@ export default function NavigationAside() {
   const [visibleSignUpModal, setVisibleSignUpModal] = useState(false);
 
   const currentUser = useAuthStore().currentUser;
+  const setCurrentUser = useAuthStore().setCurrentUser;
 
   const handleVisibleLoginModal = () => {
     setVisibleLoginModal(!visibleLoginModal);
@@ -34,6 +36,11 @@ export default function NavigationAside() {
   const handleVisibleSignUpModal = () => {
     setVisibleSignUpModal(!visibleSignUpModal);
   };
+
+  async function handleLogout() {
+    fectcher.submit({ method: "post", action: "/auth/logout" });
+    setCurrentUser(undefined);
+  }
 
   useEffect(() => {
     setTimeout(() => {
@@ -98,21 +105,34 @@ export default function NavigationAside() {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={handleVisibleLoginModal}
-            >
-              Login
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={handleVisibleSignUpModal}
-            >
-              Sign Up
-            </DropdownMenuItem>
-
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Log out @shadcn</DropdownMenuItem>
+            {currentUser ? (
+              <>
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link to={`/${currentUser.username}`}>Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={handleLogout}
+                >
+                  Log out @shadcn
+                </DropdownMenuItem>
+              </>
+            ) : (
+              <>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={handleVisibleLoginModal}
+                >
+                  Login
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={handleVisibleSignUpModal}
+                >
+                  Sign Up
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
