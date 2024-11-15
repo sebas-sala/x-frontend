@@ -38,6 +38,17 @@ import { ApiError } from "~/lib/api-utils";
 import { formatPostDate } from "~/lib/date-utils";
 
 import type { Post } from "~/types/post";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
 
 interface Props {
   post: Post;
@@ -83,11 +94,13 @@ export function PostItem({
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
 
   const [alertOpen, setAlertOpen] = useState(false);
+  const [commentOpen, setCommentOpen] = useState(false);
 
   const actions: ActionProps[] = [
     {
       name: "Comment",
       icon: () => <MessageCircle size={16} />,
+      handleAction: () => setCommentOpen(true),
     },
     {
       name: "Likes",
@@ -264,6 +277,46 @@ export function PostItem({
           </div>
         </div>
       </div>
+
+      <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
+        <DialogTrigger className="sr-only">Open</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="hidden">
+              Are you absolutely sure?
+            </DialogTitle>
+            <DialogDescription className="flex items-center">
+              <form onSubmit={handlePost}>
+                <div className="grid grid-cols-12 space-x-4">
+                  <div className="col-span-1">
+                    <Avatar>
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="col-span-11">
+                    <Textarea
+                      placeholder="What's on your mind, Chad?"
+                      className="max-h-36"
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* <Separator /> */}
+
+                <Button
+                  className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
+                  type="submit"
+                  disabled={!content || content.length < 10}
+                >
+                  Post
+                </Button>
+              </form>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
 
       <BlockAlertDialog
         username={user.username}
