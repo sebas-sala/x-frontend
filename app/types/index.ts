@@ -13,6 +13,8 @@ export type Pagination = PaginationCamelCase;
 
 export type Meta = { pagination: Pagination };
 
+export type Filter = Record<string, string | number | boolean>;
+
 export interface ApiResponseList<T> {
   data: T[];
   meta: Meta;
