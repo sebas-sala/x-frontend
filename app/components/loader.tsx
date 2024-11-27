@@ -3,17 +3,16 @@ import { LoaderIcon } from "lucide-react";
 
 import { cn } from "~/lib/utils";
 
-type LoaderProps = {
+interface LoaderProps {
   loading?: boolean;
   loadMore?: boolean;
   size?: number;
   loadingClass?: string;
   containerClass?: string;
-  loaderType: "spinner" | "dots" | "pinwheel";
   children?: React.ReactNode;
-};
+}
 
-const Loader = React.forwardRef<HTMLDivElement, LoaderProps>(
+export const Loader = React.forwardRef<HTMLDivElement, LoaderProps>(
   (
     { size = 32, loadingClass, containerClass, children, loading, loadMore },
     ref,
@@ -35,5 +34,3 @@ const Loader = React.forwardRef<HTMLDivElement, LoaderProps>(
   },
 );
 Loader.displayName = "Loader";
-
-export { Loader };
