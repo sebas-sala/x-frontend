@@ -51,6 +51,7 @@ export async function getPosts({
     headers: {
       Cookie: `token=${token}`,
     },
+    credentials: "include",
   });
 }
 
@@ -65,6 +66,22 @@ export async function likePost(postId: string) {
 export async function unlikePost(postId: string) {
   const url = `${import.meta.env.VITE_API_URL}/posts/${postId}/likes`;
   return await apiFetch<PostApiResponse>(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+}
+
+export async function bookmarkPost(postId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/posts/${postId}/bookmarks`;
+  return apiFetch<PostApiResponse>(url, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function unbookmarkPost(postId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/posts/${postId}/bookmarks`;
+  return apiFetch<PostApiResponse>(url, {
     method: "DELETE",
     credentials: "include",
   });
