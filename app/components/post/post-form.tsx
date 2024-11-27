@@ -1,5 +1,10 @@
+import { toast } from "sonner";
+import { useState } from "react";
 import { AtSign, Globe, UserRoundCheck } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+
+import { Button } from "~/components/ui/button";
+import { Textarea } from "~/components/ui/textarea";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,13 +13,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
+} from "~/components/ui/dropdown-menu";
+
 import { createPost } from "~/services/post";
-import { toast } from "sonner";
-import { useState } from "react";
-import { getUser } from "~/services/user";
 
 interface Props {
   privacy: string;

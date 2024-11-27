@@ -31,8 +31,6 @@ export function FollowList({ users, pagination, fetchMore }: FollowListProps) {
     isFollowed ? await unfollow(userId) : await follow(userId);
   };
 
-  console.log(users);
-
   return (
     <>
       {data.length === 0 ? (
@@ -50,12 +48,7 @@ export function FollowList({ users, pagination, fetchMore }: FollowListProps) {
             ))}
           </ul>
 
-          <Loader
-            loaderType="pinwheel"
-            ref={loadMoreRef}
-            loading={loading}
-            loadMore={loadMore}
-          />
+          <Loader ref={loadMoreRef} loading={loading} loadMore={loadMore} />
         </>
       )}
     </>

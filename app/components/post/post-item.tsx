@@ -49,6 +49,7 @@ import {
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
+import { bookmarkPost, unbookmarkPost } from "~/services/post";
 
 interface Props {
   post: Post;
@@ -56,6 +57,7 @@ interface Props {
   unfollow: (id: string) => Promise<void>;
   like: (id: string) => Promise<void>;
   unlike: (id: string) => Promise<void>;
+  block: (id: string) => Promise<void>;
   datePosition?: "top" | "bottom";
 }
 
@@ -80,6 +82,7 @@ export function PostItem({
   unfollow,
   like,
   unlike,
+  block,
   datePosition = "top",
 }: Props) {
   const navigate = useNavigate();
@@ -145,6 +148,16 @@ export function PostItem({
           )}
         />
       ),
+      handleAction: async (entityId: string) => {
+        try {
+          setIsBookmarked((prev) => !prev);
+          isBookmarked
+            ? await unbookmarkPost(entityId)
+            : await bookmarkPost(entityId);
+        } catch {
+          setIsBookmarked((prev) => !prev);
+        }
+      },
     },
   ];
 
@@ -165,8 +178,8 @@ export function PostItem({
     });
   };
 
-  const handleBlock = () => {
-    window.alert("Blocked!");
+  const handleBlock = async () => {
+    await block(user.id);
   };
 
   const dropdownItems: DropdownItem[] = [
@@ -278,7 +291,7 @@ export function PostItem({
         </div>
       </div>
 
-      <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
+      {/* <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
         <DialogTrigger className="sr-only">Open</DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -303,8 +316,6 @@ export function PostItem({
                   </div>
                 </div>
 
-                {/* <Separator /> */}
-
                 <Button
                   className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
                   type="submit"
@@ -316,7 +327,7 @@ export function PostItem({
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <BlockAlertDialog
         username={user.username}
