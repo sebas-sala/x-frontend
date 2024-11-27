@@ -5,7 +5,6 @@ import {
   Inbox as InboxIcon,
   Bookmark as BookmarkIcon,
   User as UserIcon,
-  MoreHorizontal as MoreHorizontalIcon,
 } from "lucide-react";
 
 export const links = [
@@ -15,5 +14,4 @@ export const links = [
   { name: "Messages", href: "/messages", icon: <InboxIcon /> },
   { name: "Bookmarks", href: "/bookmarks", icon: <BookmarkIcon /> },
   { name: "Profile", href: "/profile", icon: <UserIcon /> },
-  { name: "More", href: "/more", icon: <MoreHorizontalIcon /> },
 ];

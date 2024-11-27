@@ -1,12 +1,14 @@
 import { Link, useFetcher, useLocation } from "@remix-run/react";
 
-import NavigationLink from "./navigation-link";
+import NavigationLink, { NavLinkButton } from "./navigation-link";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "~/components/ui/dropdown-menu";
 
 import { links } from "~/data/navigation";
@@ -15,6 +17,7 @@ import { LoginModal } from "~/components/auth/login-modal";
 import { useEffect, useMemo, useState } from "react";
 import { SignupModal } from "../auth/signup-dialog";
 import { useAuthStore } from "~/store/auth";
+import { MoreHorizontalIcon } from "lucide-react";
 
 // import PostButton from "./PostButton";
 export default function NavigationAside() {
@@ -91,6 +94,29 @@ export default function NavigationAside() {
               </li>
             );
           })}
+          {currentUser && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <li>
+                  <NavLinkButton>
+                    <MoreHorizontalIcon />
+                    <span>More</span>
+                  </NavLinkButton>
+                </li>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link to="/blocked-users">Blocked users</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link to="/subscriptions">Subscriptions</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </ul>
         <div>
           <PostButton />
