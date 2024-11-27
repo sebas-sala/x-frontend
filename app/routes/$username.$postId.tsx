@@ -31,7 +31,6 @@ export const loader = async ({
       postResponse,
     });
   } catch (error) {
-    console.log(error);
     return redirect("/home?error=profile_not_found");
   }
 };

@@ -12,8 +12,6 @@ export function ProfileInfo({ profile }: { profile: User }) {
     },
   );
 
-  console.log(profile);
-
   return (
     <div className="mt-8 px-6">
       <h4 className="text-3xl font-black">{profile.name}</h4>
