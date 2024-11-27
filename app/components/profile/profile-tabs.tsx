@@ -1,9 +1,7 @@
-import { useState } from "react";
-
 import { PostList } from "~/components/post/post-list";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { getPosts } from "~/services/post";
+import { usePostData } from "~/hooks/use-post-data";
 
 import type { ApiResponseList } from "~/types";
 import type { Post } from "~/types/post";
@@ -17,10 +15,6 @@ export function ProfileTabs({
   isOwner: boolean;
   postsResponse: ApiResponseList<Post>;
 }) {
-  const [postsPagination, setPostsPagination] = useState(
-    postsResponse.meta.pagination,
-  );
-
   const tabs = [
     { name: "Posts", value: "posts" },
     { name: "Replies", value: "replies" },
@@ -31,12 +25,27 @@ export function ProfileTabs({
     ? tabs
     : tabs.filter((tab) => tab.value !== "likes");
 
-  const fetchMorePosts = async (page: number) => {
-    const res = await getPosts({ page, filters: [{ by_username: username }] });
-    setPostsPagination(res.meta.pagination);
+  const { posts, pagination, fetchMorePosts } = usePostData({
+    initialData: postsResponse.data,
+    initialPagination: postsResponse.meta?.pagination,
+    filters: [{ by_username: username }],
+  });
 
-    return res.data;
-  };
+  const {
+    posts: replies,
+    pagination: repliesPagination,
+    fetchMorePosts: fetchMoreReplies,
+  } = usePostData({
+    filters: [{ by_replies: true }],
+  });
+
+  const {
+    posts: likedPosts,
+    pagination: likedPostsPagination,
+    fetchMorePosts: fetchMoreLikedPosts,
+  } = usePostData({
+    filters: [{ by_like: true }],
+  });
 
   return (
     <Tabs className="mt-4 w-full" defaultValue="posts">
@@ -56,12 +65,25 @@ export function ProfileTabs({
 
       <TabsContent value="posts" className="px-0">
         <PostList
-          initialData={postsResponse.data}
-          pagination={postsPagination}
+          initialData={posts}
+          pagination={pagination}
           fetchMore={fetchMorePosts}
         />
       </TabsContent>
-      <TabsContent value="likes">Likes</TabsContent>
+      <TabsContent value="replies">
+        <PostList
+          initialData={replies}
+          pagination={repliesPagination}
+          fetchMore={fetchMoreReplies}
+        />
+      </TabsContent>
+      <TabsContent value="likes">
+        <PostList
+          initialData={likedPosts}
+          pagination={likedPostsPagination}
+          fetchMore={fetchMoreLikedPosts}
+        />
+      </TabsContent>
     </Tabs>
   );
 }
