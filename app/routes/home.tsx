@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
@@ -6,77 +5,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { getPosts } from "~/services/post";
 
-import type { Post, PostApiResponseList } from "~/types/post";
-import type { LoaderFunction } from "@remix-run/node";
 import { getSession } from "~/sessions";
-import { usePostStore } from "~/store/post";
 
-export const loader: LoaderFunction = async ({ request }) => {
+import { usePostData } from "~/hooks/use-post-data";
+
+import type { Post } from "~/types/post";
+
+export const loader = async ({ request }: { request: Request }) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  try {
-    const [posts, postsByFollowing] = await Promise.all([
-      getPosts({
-        token,
-      }),
-      getPosts({ filters: [{ by_following: true }], token }),
-    ]);
+  const filters = [{}, { by_following: true }];
+  const [posts, postsByFollowing] = await Promise.all(
+    filters.map((filter) => getPosts({ ...filter, token })),
+  );
 
-    return json({
-      posts: posts || [],
-      postsByFollowing: postsByFollowing || [],
-    });
-  } catch (error) {
-    return json({ posts: [], postsByFollowing: [] });
-  }
+  return json({
+    posts: posts || [],
+    postsByFollowing: postsByFollowing || [],
+  });
 };
 
 export default function Home() {
-  const { posts, postsByFollowing } = useLoaderData<typeof loader>();
+  const { posts: postsLoader, postsByFollowing: postsByFollowingLoader } =
+    useLoaderData<typeof loader>();
 
-  const [postsFypResponse, setPostsFypResponse] = useState<PostApiResponseList>(
-    posts as PostApiResponseList,
-  );
-  const [postsFollowingResponse, setPostsFollowingResponse] =
-    useState<PostApiResponseList>(postsByFollowing as PostApiResponseList);
+  const {
+    posts: fypPosts,
+    pagination: fypPagination,
+    fetchMorePosts: fetchMoreFypPosts,
+  } = usePostData({
+    initialData: postsLoader.data as Post[],
+    initialPagination: postsLoader.meta?.pagination,
+  });
 
-  const fypPosts = usePostStore().fypPosts;
-  const followingPosts = usePostStore().followingPosts;
-  const setFypPosts = usePostStore().setFypPosts;
-  const setFollowingPosts = usePostStore().setFollowingPosts;
-
-  // useEffect(() => {
-  //   setFypPosts(postsFypResponse.data as Post[]);
-  //   setFollowingPosts(postsFollowingResponse.data as Post[]);
-  // }, [
-  //   postsFypResponse,
-  //   postsFollowingResponse,
-  //   setFypPosts,
-  //   setFollowingPosts,
-  // ]);
-
-  const fetchMoreFypPosts = async (page: number) => {
-    try {
-      const res = await getPosts({
-        page,
-      });
-      setPostsFypResponse(res);
-      setFypPosts([...fypPosts, ...res.data]);
-
-      return res.data;
-    } catch (e) {
-      return [];
-    }
-  };
-
-  const fetchMorePostsByFollowings = async (page: number) => {
-    const res = await getPosts({ page, filters: [{ by_following: true }] });
-    setPostsFollowingResponse(res as PostApiResponseList);
-    setFollowingPosts([...followingPosts, ...res.data]);
-
-    return res?.data;
-  };
+  const {
+    posts: followingPosts,
+    pagination: followingPagination,
+    fetchMorePosts: fetchMoreFollowing,
+  } = usePostData({
+    initialData: postsByFollowingLoader.data as Post[],
+    initialPagination: postsByFollowingLoader.meta?.pagination,
+  });
 
   return (
     <main className="relative flex min-h-screen flex-col">
@@ -92,18 +62,16 @@ export default function Home() {
           </TabsList>
           <TabsContent value="fyp">
             <PostList
-              initialData={postsFypResponse.data as Post[]}
-              posts={fypPosts}
-              pagination={postsFypResponse.meta?.pagination}
+              initialData={fypPosts}
+              pagination={fypPagination}
               fetchMore={fetchMoreFypPosts}
             />
           </TabsContent>
           <TabsContent value="following">
             <PostList
-              initialData={postsFollowingResponse.data as Post[]}
-              posts={followingPosts}
-              pagination={postsFollowingResponse.meta?.pagination}
-              fetchMore={fetchMorePostsByFollowings}
+              initialData={followingPosts}
+              pagination={followingPagination}
+              fetchMore={fetchMoreFollowing}
             />
           </TabsContent>
         </Tabs>
