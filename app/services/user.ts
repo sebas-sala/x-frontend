@@ -121,3 +121,41 @@ export async function unfollowUser(userId: string) {
     credentials: "include",
   });
 }
+
+export async function blockUser(userId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/users/${userId}/block`;
+  return apiFetch<UserApiResponseList>(url, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export async function unblockUser(userId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/users/${userId}/unblock`;
+  return apiFetch<UserApiResponseList>(url, {
+    method: "DELETE",
+    credentials: "include",
+  });
+}
+
+export async function getBlockedUsers({
+  page,
+  token,
+}: {
+  page?: number;
+  token?: string;
+}) {
+  const url = new URL(`${import.meta.env.VITE_API_URL}/users/blocked`);
+
+  if (page) {
+    url.searchParams.append("page", page.toString());
+  }
+
+  return apiFetch<UserApiResponseList>(url, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      Cookie: `token=${token}`,
+    },
+  });
+}
