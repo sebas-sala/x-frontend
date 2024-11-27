@@ -26,17 +26,21 @@ export function PostList({ initialData, pagination, fetchMore }: Props) {
     <>
       {data && data.length > 0 ? (
         <ul>
-          {data.map((post) => (
-            <PostItem
-              key={post.id}
-              post={post}
-              follow={follow}
-              unfollow={unfollow}
-              like={like}
-              unlike={unlike}
-              block={block}
-            />
-          ))}
+          {data.map((post) => {
+            const uniqueId = Math.random().toString(36).substring(7);
+
+            return (
+              <PostItem
+                key={`${uniqueId}-${post.id}`}
+                post={post}
+                follow={follow}
+                unfollow={unfollow}
+                like={like}
+                unlike={unlike}
+                block={block}
+              />
+            );
+          })}
         </ul>
       ) : (
         <p className="text-gray-500">No posts found</p>
