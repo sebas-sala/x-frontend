@@ -140,7 +140,7 @@ export default function NavigationAside() {
                   className="cursor-pointer"
                   onClick={handleLogout}
                 >
-                  Log out @shadcn
+                  Log out @{currentUser.username}
                 </DropdownMenuItem>
               </>
             ) : (
