@@ -15,22 +15,22 @@ export const usePostData = ({
   initialData,
   initialPagination,
   filters,
-}: Props) => {
+}: Props = {}) => {
   const [posts, setPosts] = useState<Post[]>(initialData || []);
   const [pagination, setPagination] = useState<Pagination>(
     initialPagination || {
-      page: 1,
+      page: 0,
       perPage: 15,
       total: 0,
       totalPages: 0,
       hasPrevPage: false,
-      hasNextPage: false,
+      hasNextPage: true,
     },
   );
 
   const fetchMorePosts = async (page: number) => {
     try {
-      const res = await getPosts({ page, ...filters });
+      const res = await getPosts({ page, filters });
 
       setPosts((prevPosts) => [...prevPosts, ...res.data]);
       setPagination(res.meta?.pagination);
