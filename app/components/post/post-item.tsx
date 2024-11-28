@@ -91,8 +91,8 @@ export function PostItem({
 
   const { user } = post;
 
-  const [isFollowed, setIsFollowed] = useState(user.isFollowed);
   const [isLiked, setIsLiked] = useState(post.isLiked);
+  const [isFollowed, setIsFollowed] = useState(user.isFollowed);
   const [likesCount, setLikesCount] = useState(post.likesCount ?? 0);
   const [isBookmarked, setIsBookmarked] = useState(post.isBookmarked);
 

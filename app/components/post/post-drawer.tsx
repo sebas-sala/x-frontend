@@ -27,7 +27,7 @@ export function PostDrawer({
     <Drawer open={open} onOpenChange={handleOnOpenChange}>
       <DrawerTrigger asChild>
         <Button
-          className="bg-sky-500 rounded-full px-6 text-xl font-bold hover:bg-sky-400"
+          className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
           onClick={() => handleOnOpenChange(false)}
         >
           Post

@@ -16,10 +16,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  const filters = [{}, { by_following: true }];
-  const [posts, postsByFollowing] = await Promise.all(
-    filters.map((filter) => getPosts({ ...filter, token })),
-  );
+  const [posts, postsByFollowing] = await Promise.all([
+    getPosts({ token }),
+    getPosts({ token, filters: [{ by_following: true }] }),
+  ]);
 
   return {
     posts: posts || [],
@@ -47,6 +47,7 @@ export default function Home() {
   } = usePostData({
     initialData: postsByFollowingLoader.data as Post[],
     initialPagination: postsByFollowingLoader.meta?.pagination,
+    filters: [{ by_following: true }],
   });
 
   return (

@@ -15,19 +15,23 @@ import { cn } from "~/lib/utils";
 import { useShadow } from "~/hooks/use-shadow";
 
 import type { User } from "~/types/user";
+import { getSession } from "~/sessions";
+import { LoaderFunctionArgs } from "@remix-run/node";
 
-export const loader = async ({ params }: { params: { username: string } }) => {
-  try {
-    if (!params.username) {
-      return redirect("/home");
-    }
-
-    const followersResponse = await getFollowing({ username: params.username });
-
-    return { followersResponse };
-  } catch (error) {
-    return redirect("/home?error=profile_not_found");
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+  if (!params.username) {
+    return redirect("/home");
   }
+
+  const session = await getSession(request);
+  const token = session.get("token");
+
+  const followersResponse = await getFollowing({
+    token,
+    username: params.username,
+  });
+
+  return { followersResponse };
 };
 
 export default function Following() {
