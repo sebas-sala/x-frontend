@@ -1,9 +1,8 @@
 import {
-  json,
   Outlet,
-  useLoaderData,
-  useNavigate,
   useParams,
+  useNavigate,
+  useLoaderData,
 } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
 
@@ -38,7 +37,7 @@ export const loader = async ({
       getPosts({ filters: [{ by_username: params.username }], token }),
     ]);
 
-    return json({ profileResponse, postsResponse });
+    return { profileResponse, postsResponse };
   } catch (error) {
     return redirect("/home?error=profile_not_found");
   }

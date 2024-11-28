@@ -1,4 +1,4 @@
-import { json, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -10,8 +10,9 @@ import { getSession } from "~/sessions";
 import { usePostData } from "~/hooks/use-post-data";
 
 import type { Post } from "~/types/post";
+import { LoaderFunctionArgs } from "@remix-run/node";
 
-export const loader = async ({ request }: { request: Request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
@@ -20,10 +21,10 @@ export const loader = async ({ request }: { request: Request }) => {
     filters.map((filter) => getPosts({ ...filter, token })),
   );
 
-  return json({
+  return {
     posts: posts || [],
     postsByFollowing: postsByFollowing || [],
-  });
+  };
 };
 
 export default function Home() {

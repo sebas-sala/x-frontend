@@ -1,10 +1,9 @@
 import {
-  json,
   Link,
   redirect,
-  useLoaderData,
-  useNavigate,
   useParams,
+  useNavigate,
+  useLoaderData,
 } from "@remix-run/react";
 import { ArrowLeftIcon } from "lucide-react";
 
@@ -33,7 +32,7 @@ export const loader = async ({
       token,
     });
 
-    return json({ followersResponse });
+    return { followersResponse };
   } catch {
     redirect("/home?error=profile_not_found");
   }

@@ -1,4 +1,5 @@
-import { json, redirect, useLoaderData } from "@remix-run/react";
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { redirect, useLoaderData } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
 
@@ -8,7 +9,7 @@ import { usePostData } from "~/hooks/use-post-data";
 
 import type { Post } from "~/types/post";
 
-export const loader = async ({ request }: { request: Request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
@@ -18,9 +19,9 @@ export const loader = async ({ request }: { request: Request }) => {
       filters: [{ by_bookmarked: true }],
     });
 
-    return json({
+    return {
       postsResponse: posts,
-    });
+    };
   } catch (error) {
     return redirect("/home?error=bokmarks_not_found");
   }

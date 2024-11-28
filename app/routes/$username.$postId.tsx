@@ -1,4 +1,4 @@
-import { json, redirect, useLoaderData, useParams } from "@remix-run/react";
+import { redirect, useLoaderData, useParams } from "@remix-run/react";
 
 import { GoBack } from "~/components/go-back";
 import { PostItem } from "~/components/post/post-item";
@@ -27,9 +27,9 @@ export const loader = async ({
       token,
     });
 
-    return json({
+    return {
       postResponse,
-    });
+    };
   } catch (error) {
     return redirect("/home?error=profile_not_found");
   }

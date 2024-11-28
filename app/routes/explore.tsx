@@ -1,4 +1,4 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { FollowList } from "~/components/follow/follow-list";
 
@@ -18,7 +18,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   ]);
 
-  return json({ usersResponse: usersResponse || [] });
+  return { usersResponse: usersResponse };
 };
 
 export default function Explore() {

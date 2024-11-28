@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLoaderData } from "@remix-run/react";
+import { LoaderFunctionArgs } from "@remix-run/node";
 import { useInfiniteScroll } from "react-continous-scroll";
-import { json, LoaderFunctionArgs } from "@remix-run/node";
 
 import { UserItem } from "~/components/user/user-item";
 import { UserList } from "~/components/user/user-list";
@@ -19,7 +19,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const token = session.get("token");
 
   const usersResponse = await getBlockedUsers({ token });
-  return json({ usersResponse: usersResponse || [] });
+  return { usersResponse: usersResponse };
 };
 
 export default function BlockedUsers() {
