@@ -1,4 +1,4 @@
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteError } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -11,21 +11,32 @@ import { usePostData } from "~/hooks/use-post-data";
 
 import type { Post } from "~/types/post";
 import { LoaderFunctionArgs } from "@remix-run/node";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  const [posts, postsByFollowing] = await Promise.all([
-    getPosts({ token }),
-    getPosts({ token, filters: [{ by_following: true }] }),
-  ]);
+  try {
+    const [posts, postsByFollowing] = await Promise.all([
+      getPosts({ token }),
+      getPosts({ token, filters: [{ by_following: true }] }),
+    ]);
 
-  return {
-    posts: posts || [],
-    postsByFollowing: postsByFollowing || [],
-  };
+    return {
+      posts: posts || [],
+      postsByFollowing: postsByFollowing || [],
+    };
+  } catch {
+    throw new Error("Failed to load posts");
+  }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Home() {
   const { posts: postsLoader, postsByFollowing: postsByFollowingLoader } =

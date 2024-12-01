@@ -4,6 +4,7 @@ import {
   useParams,
   useNavigate,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import { ArrowLeftIcon } from "lucide-react";
 
@@ -17,6 +18,7 @@ import { useShadow } from "~/hooks/use-shadow";
 import type { User } from "~/types/user";
 import { getSession } from "~/sessions";
 import { LoaderFunctionArgs } from "@remix-run/node";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   if (!params.username) {
@@ -26,13 +28,23 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  const followersResponse = await getFollowing({
-    token,
-    username: params.username,
-  });
+  try {
+    const followersResponse = await getFollowing({
+      token,
+      username: params.username,
+    });
 
-  return { followersResponse };
+    return { followersResponse };
+  } catch {
+    throw new Error("Failed to load followers");
+  }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Following() {
   const { username } = useParams();

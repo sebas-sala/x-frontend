@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { redirect, useLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteError } from "@remix-run/react";
 
 import { PostList } from "~/components/post/post-list";
 
@@ -8,12 +8,13 @@ import { getSession } from "~/sessions";
 import { usePostData } from "~/hooks/use-post-data";
 
 import type { Post } from "~/types/post";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const session = await getSession(request);
-  const token = session.get("token");
-
   try {
+    const session = await getSession(request);
+    const token = session.get("token");
+
     const posts = await getPosts({
       token,
       filters: [{ by_bookmarked: true }],
@@ -23,9 +24,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       postsResponse: posts,
     };
   } catch (error) {
-    return redirect("/home?error=bokmarks_not_found");
+    throw new Error("Failed to load bookmarks");
   }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Bookmarks() {
   const { postsResponse } = useLoaderData<typeof loader>();

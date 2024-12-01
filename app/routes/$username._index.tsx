@@ -3,8 +3,8 @@ import {
   useParams,
   useNavigate,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
-import { redirect } from "@remix-run/node";
 
 import { Button } from "~/components/ui/button";
 import { ProfileTabs } from "~/components/profile/profile-tabs";
@@ -20,6 +20,7 @@ import type { Post } from "~/types/post";
 import type { User } from "~/types/user";
 import type { ApiResponseList } from "~/types";
 import { getSession } from "~/sessions";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({
   params,
@@ -39,9 +40,15 @@ export const loader = async ({
 
     return { profileResponse, postsResponse };
   } catch (error) {
-    return redirect("/home?error=profile_not_found");
+    throw new Error("Failed to load profile");
   }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Profile() {
   const { username } = useParams();

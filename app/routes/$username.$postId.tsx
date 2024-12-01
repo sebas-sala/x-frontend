@@ -1,4 +1,4 @@
-import { redirect, useLoaderData, useParams } from "@remix-run/react";
+import { useLoaderData, useParams, useRouteError } from "@remix-run/react";
 
 import { GoBack } from "~/components/go-back";
 import { PostItem } from "~/components/post/post-item";
@@ -12,6 +12,7 @@ import { useUserStore } from "~/store/user";
 import type { Post } from "~/types/post";
 import { useAuthStore } from "~/store/auth";
 import { useEffect, useRef } from "react";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({
   params,
@@ -33,9 +34,15 @@ export const loader = async ({
       postResponse,
     };
   } catch (error) {
-    return redirect("/home?error=profile_not_found");
+    throw new Error("Failed to load post");
   }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function PostPage() {
   const { username } = useParams();

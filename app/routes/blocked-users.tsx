@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteError } from "@remix-run/react";
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useInfiniteScroll } from "react-continous-scroll";
 
@@ -13,14 +13,25 @@ import { useAuthStore } from "~/store/auth";
 import { getBlockedUsers, unblockUser } from "~/services/user";
 
 import type { User } from "~/types/user";
+import { ErrorPage } from "~/components/error-page";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  const usersResponse = await getBlockedUsers({ token });
-  return { usersResponse: usersResponse };
+  try {
+    const usersResponse = await getBlockedUsers({ token });
+    return { usersResponse: usersResponse };
+  } catch {
+    throw new Error("Failed to load blocked users");
+  }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function BlockedUsers() {
   const { usersResponse } = useLoaderData<typeof loader>();

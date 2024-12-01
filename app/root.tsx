@@ -84,6 +84,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         token,
       },
       reconnection: true,
+      reconnectionAttempts: 10,
     });
     setSocket(socket);
 

@@ -1,11 +1,12 @@
 import {
   Link,
-  redirect,
   useParams,
   useNavigate,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import { ArrowLeftIcon } from "lucide-react";
+import { ErrorPage } from "~/components/error-page";
 
 import { FollowList } from "~/components/follow/follow-list";
 import { useShadow } from "~/hooks/use-shadow";
@@ -34,9 +35,15 @@ export const loader = async ({
 
     return { followersResponse };
   } catch {
-    redirect("/home?error=profile_not_found");
+    throw new Error("Failed to load followers");
   }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Followers() {
   const { username } = useParams();

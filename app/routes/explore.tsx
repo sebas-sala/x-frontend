@@ -1,5 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useRouteError } from "@remix-run/react";
+import { ErrorPage } from "~/components/error-page";
 import { FollowList } from "~/components/follow/follow-list";
 import { PostList } from "~/components/post/post-list";
 
@@ -13,18 +14,28 @@ import { Post } from "~/types/post";
 import { User } from "~/types/user";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const session = await getSession(request);
-  const token = session.get("token");
+  try {
+    const session = await getSession(request);
+    const token = session.get("token");
 
-  const [usersResponse, postsResponse] = await Promise.all([
-    getUsers({
-      token,
-    }),
-    getPosts({ token, orderBy: "trending" }),
-  ]);
+    const [usersResponse, postsResponse] = await Promise.all([
+      getUsers({
+        token,
+      }),
+      getPosts({ token, orderBy: "trending" }),
+    ]);
 
-  return { usersResponse, postsResponse };
+    return { usersResponse, postsResponse };
+  } catch {
+    throw new Error("Failed to load data");
+  }
 };
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return <ErrorPage error={error} />;
+}
 
 export default function Explore() {
   const { usersResponse, postsResponse } = useLoaderData<typeof loader>();
