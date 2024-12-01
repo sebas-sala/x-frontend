@@ -6,20 +6,24 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import { Toaster } from "sonner";
+import { jwtDecode } from "jwt-decode";
+import { ArrowBigUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
-import "./tailwind.css";
-import NavigationAside from "./components/navigation-aside/navigation-aside";
-import { Toaster } from "sonner";
-import { ArrowBigUp } from "lucide-react";
+import { NavigationAside } from "./components/navigation-aside/navigation-aside";
+
 import { getSession } from "./sessions";
-import { useAuthStore } from "./store/auth";
-import { useEffect, useState } from "react";
 import { getUser } from "./services/user";
-import { jwtDecode } from "jwt-decode";
+
+import { useAuthStore } from "./store/auth";
 import { useNotificationStore } from "./store/notification";
-import { NotificationApiResponseList } from "./types/notification";
+
+import type { NotificationApiResponseList } from "./types/notification";
+
+import "./tailwind.css";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -39,64 +43,58 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const token = session.get("token");
 
   let decoded: { sub: string } | null = null;
-  let hasToken = false;
 
   if (token) {
-    try {
-      decoded = jwtDecode(token) as { sub: string };
-      hasToken = true;
-    } catch (error) {
-      hasToken = false;
-    }
+    decoded = jwtDecode(token) as { sub: string };
   }
 
-  return { hasToken, decoded, token };
+  return { decoded, token };
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { hasToken, decoded, token } = useLoaderData<typeof loader>();
+  const { decoded, token } = useLoaderData<typeof loader>();
 
-  const setIsLogged = useAuthStore((state) => state.setIsLogged);
-  const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
-  const currentUser = useAuthStore((state) => state.currentUser);
+  const currentUser = useAuthStore.use.currentUser;
+  const setCurrentUser = useAuthStore.use.setCurrentUser();
 
   const [socket, setSocket] = useState<Socket>();
 
-  const addNotification = useNotificationStore().addNotification;
-  const addManyNotifications = useNotificationStore().addManyNotifications;
-  const setPagination = useNotificationStore().setPagination;
+  const setPagination = useNotificationStore.use.setPagination();
+  const addNotification = useNotificationStore.use.addNotification();
+  const addManyNotifications = useNotificationStore.use.addManyNotifications();
 
   useEffect(() => {
-    if (hasToken && decoded && !currentUser) {
+    if (decoded && !currentUser) {
       getUser(decoded.sub).then((user) => {
         setCurrentUser(user.data);
       });
-
-      setIsLogged(true);
     }
-  }, [hasToken, decoded, setIsLogged, setCurrentUser, currentUser, token]);
+  }, [decoded, setCurrentUser, currentUser]);
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !socket) return;
 
-    const socket = io(`http://localhost:3000/notifications`, {
+    const notificationSocket = io(`http://localhost:3000/notifications`, {
       auth: {
         token,
       },
       reconnection: true,
       reconnectionAttempts: 10,
     });
-    setSocket(socket);
+    setSocket(notificationSocket);
 
-    socket.emit("getNotifications", (data: NotificationApiResponseList) => {
-      addManyNotifications(data.data);
-      setPagination(data.meta.pagination);
-    });
+    notificationSocket.emit(
+      "getNotifications",
+      (data: NotificationApiResponseList) => {
+        addManyNotifications(data.data);
+        setPagination(data.meta.pagination);
+      },
+    );
 
     return () => {
-      socket.close();
+      notificationSocket.close();
     };
-  }, [token, addManyNotifications, setPagination]);
+  }, [token, addManyNotifications, setPagination, socket]);
 
   useEffect(() => {
     if (!socket) return;

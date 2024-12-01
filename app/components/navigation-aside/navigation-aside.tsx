@@ -14,13 +14,13 @@ import {
 import { links } from "~/data/navigation";
 import { PostButton } from "../post/post-button";
 import { LoginModal } from "~/components/auth/login-modal";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import { SignupModal } from "../auth/signup-dialog";
 import { useAuthStore } from "~/store/auth";
 import { MoreHorizontalIcon } from "lucide-react";
 
 // import PostButton from "./PostButton";
-export default function NavigationAside() {
+export const NavigationAside = memo(() => {
   const location = useLocation();
   const fectcher = useFetcher();
 
@@ -174,4 +174,5 @@ export default function NavigationAside() {
       />
     </div>
   );
-}
+});
+NavigationAside.displayName = "NavigationAside";
