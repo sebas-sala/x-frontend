@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Loader } from "~/components/loader";
 import { PostItem } from "~/components/post/post-item";
 
@@ -22,11 +24,36 @@ export function PostList({ initialData, pagination, fetchMore }: Props) {
     fetchMore,
   });
 
+  const [filteredData, setFilteredData] = useState<Post[]>(data);
+  const previousData = useRef<Post[]>(data);
+
+  useEffect(() => {
+    previousData.current = data;
+    setFilteredData(data);
+  }, [data]);
+
+  const handleBlock = async (userId: string) => {
+    try {
+      previousData.current = filteredData;
+
+      setFilteredData((prevData) =>
+        prevData.filter((post) => post.user.id !== userId),
+      );
+
+      await block(userId);
+
+      toast.success("User blocked successfully");
+    } catch (error) {
+      setFilteredData(previousData.current);
+      throw error;
+    }
+  };
+
   return (
     <>
-      {data && data.length > 0 ? (
+      {filteredData && data.length > 0 ? (
         <ul>
-          {data.map((post) => {
+          {filteredData.map((post) => {
             const uniqueId = Math.random().toString(36).substring(7);
 
             return (
@@ -37,7 +64,7 @@ export function PostList({ initialData, pagination, fetchMore }: Props) {
                 unfollow={unfollow}
                 like={like}
                 unlike={unlike}
-                block={block}
+                block={handleBlock}
               />
             );
           })}

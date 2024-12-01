@@ -51,13 +51,15 @@ const ActionItem = ({
       >
         {item.icon()}
       </span>
-      <span
-        className={cn("text-sm font-semibold transition-all duration-200", {
-          [colorName]: isHovered,
-        })}
-      >
-        {item.count}
-      </span>
+      {(item.count ?? 0) > 0 && (
+        <span
+          className={cn("text-sm font-semibold transition-all duration-200", {
+            [colorName]: isHovered,
+          })}
+        >
+          {item.count}
+        </span>
+      )}
     </div>
   );
 };

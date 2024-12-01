@@ -135,10 +135,11 @@ export function PostItem({
     },
     {
       name: "Views",
+      count: post.viewsCount,
       icon: () => <BarChart2 size={16} />,
     },
     {
-      name: isBookmarked ? "Unbookmark" : "Bookmark",
+      name: "Bookmarks",
       icon: () => (
         <Bookmark
           size={16}
@@ -194,11 +195,6 @@ export function PostItem({
       icon: BanIcon,
       text: `Block @${user.username}`,
       action: () => setAlertOpen(true),
-    },
-    {
-      id: "ignore",
-      icon: FrownIcon,
-      text: `Not interested in this post`,
     },
   ].filter(
     (item) =>

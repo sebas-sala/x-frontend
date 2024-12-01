@@ -4,12 +4,14 @@ import { GoBack } from "~/components/go-back";
 import { PostItem } from "~/components/post/post-item";
 
 import { getSession } from "~/sessions";
-import { getPost } from "~/services/post";
+import { createPostView, getPost } from "~/services/post";
 
 import { usePostStore } from "~/store/post";
 import { useUserStore } from "~/store/user";
 
 import type { Post } from "~/types/post";
+import { useAuthStore } from "~/store/auth";
+import { useEffect, useRef } from "react";
 
 export const loader = async ({
   params,
@@ -50,6 +52,15 @@ export default function PostPage() {
 
   const like = usePostStore().like;
   const unlike = usePostStore().unlike;
+
+  const hasViewedRef = useRef(false);
+
+  useEffect(() => {
+    if (post.isViewed || hasViewedRef.current) return;
+
+    createPostView(post.id);
+    hasViewedRef.current = true;
+  }, [post]);
 
   return (
     <main>

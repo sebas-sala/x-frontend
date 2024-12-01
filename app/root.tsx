@@ -1,5 +1,4 @@
 import {
-  json,
   Links,
   Meta,
   Outlet,
@@ -7,6 +6,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import { io, Socket } from "socket.io-client";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
 import "./tailwind.css";
@@ -15,9 +15,11 @@ import { Toaster } from "sonner";
 import { ArrowBigUp } from "lucide-react";
 import { getSession } from "./sessions";
 import { useAuthStore } from "./store/auth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getUser } from "./services/user";
 import { jwtDecode } from "jwt-decode";
+import { useNotificationStore } from "./store/notification";
+import { NotificationApiResponseList } from "./types/notification";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -34,7 +36,6 @@ export const links: LinksFunction = () => [
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
-
   const token = session.get("token");
 
   let decoded: { sub: string } | null = null;
@@ -42,22 +43,28 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   if (token) {
     try {
-      hasToken = true;
       decoded = jwtDecode(token) as { sub: string };
+      hasToken = true;
     } catch (error) {
       hasToken = false;
     }
   }
 
-  return json({ hasToken, decoded });
+  return { hasToken, decoded, token };
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { hasToken, decoded } = useLoaderData<typeof loader>();
+  const { hasToken, decoded, token } = useLoaderData<typeof loader>();
 
   const setIsLogged = useAuthStore((state) => state.setIsLogged);
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const currentUser = useAuthStore((state) => state.currentUser);
+
+  const [socket, setSocket] = useState<Socket>();
+
+  const addNotification = useNotificationStore().addNotification;
+  const addManyNotifications = useNotificationStore().addManyNotifications;
+  const setPagination = useNotificationStore().setPagination;
 
   useEffect(() => {
     if (hasToken && decoded && !currentUser) {
@@ -67,7 +74,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       setIsLogged(true);
     }
-  }, [hasToken, decoded, setIsLogged, setCurrentUser, currentUser]);
+  }, [hasToken, decoded, setIsLogged, setCurrentUser, currentUser, token]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    const socket = io(`http://localhost:3000/notifications`, {
+      auth: {
+        token,
+      },
+      reconnection: true,
+    });
+    setSocket(socket);
+
+    socket.emit("getNotifications", (data: NotificationApiResponseList) => {
+      addManyNotifications(data.data);
+      setPagination(data.meta.pagination);
+    });
+
+    return () => {
+      socket.close();
+    };
+  }, [token, addManyNotifications, setPagination]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("connect", () => {
+      console.log("connected");
+    });
+
+    socket.on("disconnect", () => {
+      console.log("disconnected");
+    });
+
+    socket.on("notification", (data) => {
+      addNotification(data);
+    });
+  }, [socket, addNotification]);
 
   return (
     <html lang="en">

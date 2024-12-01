@@ -9,12 +9,14 @@ interface Props {
   initialData?: Post[];
   initialPagination?: Pagination;
   filters?: Filter[];
+  orderBy?: string;
 }
 
 export const usePostData = ({
   initialData,
   initialPagination,
   filters,
+  orderBy,
 }: Props = {}) => {
   const [posts, setPosts] = useState<Post[]>(initialData || []);
   const [pagination, setPagination] = useState<Pagination>(
@@ -30,7 +32,7 @@ export const usePostData = ({
 
   const fetchMorePosts = async (page: number) => {
     try {
-      const res = await getPosts({ page, filters });
+      const res = await getPosts({ page, filters, orderBy });
 
       setPosts((prevPosts) => [...prevPosts, ...res.data]);
       setPagination(res.meta?.pagination);

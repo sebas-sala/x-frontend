@@ -1,28 +1,33 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { FollowList } from "~/components/follow/follow-list";
+import { PostList } from "~/components/post/post-list";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { usePostData } from "~/hooks/use-post-data";
+import { getPosts } from "~/services/post";
 
 import { getUsers } from "~/services/user";
 import { getSession } from "~/sessions";
+import { Post } from "~/types/post";
 import { User } from "~/types/user";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const session = await getSession(request);
   const token = session.get("token");
 
-  const [usersResponse] = await Promise.all([
+  const [usersResponse, postsResponse] = await Promise.all([
     getUsers({
       token,
     }),
+    getPosts({ token, orderBy: "trending" }),
   ]);
 
-  return { usersResponse: usersResponse };
+  return { usersResponse, postsResponse };
 };
 
 export default function Explore() {
-  const { usersResponse } = useLoaderData<typeof loader>();
+  const { usersResponse, postsResponse } = useLoaderData<typeof loader>();
 
   const tabs = [
     { name: "Trending", value: "trending" },
@@ -37,6 +42,16 @@ export default function Explore() {
       return [];
     }
   };
+
+  const {
+    posts,
+    pagination: postsPagination,
+    fetchMorePosts,
+  } = usePostData({
+    initialData: postsResponse.data as Post[],
+    initialPagination: postsResponse.meta?.pagination,
+    orderBy: "trending",
+  });
 
   return (
     <main>
@@ -55,7 +70,13 @@ export default function Explore() {
           ))}
         </TabsList>
 
-        <TabsContent value="trending">Trending</TabsContent>
+        <TabsContent value="trending">
+          <PostList
+            initialData={posts}
+            pagination={postsPagination}
+            fetchMore={fetchMorePosts}
+          />
+        </TabsContent>
         <TabsContent value="users">
           <FollowList
             users={usersResponse.data as User[]}

@@ -32,19 +32,38 @@ export async function getPost({
   });
 }
 
+export async function createPostView(postId: string) {
+  const url = `${import.meta.env.VITE_API_URL}/views`;
+
+  return apiFetch<PostApiResponse>(url, {
+    method: "POST",
+    credentials: "include",
+    body: JSON.stringify({ postId }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
+
 export async function getPosts({
   page = 1,
   token,
+  orderBy,
   filters,
 }: {
   page?: number;
   token?: string;
+  orderBy?: string;
   filters?: Record<string, string | number | boolean>[];
 }): Promise<PostApiResponseList> {
   const url = new URL(`${import.meta.env.VITE_API_URL}/posts`);
 
   filters?.forEach((filter) => setSearchParams(url, filter));
   setSearchParams(url, { page });
+
+  if (orderBy) {
+    setSearchParams(url, { orderBy });
+  }
 
   return apiFetch<PostApiResponseList>(url, {
     method: "GET",

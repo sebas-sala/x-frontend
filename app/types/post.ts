@@ -13,6 +13,8 @@ export interface Post {
   isLiked?: boolean;
   likesCount?: number;
   isBookmarked?: boolean;
+  isViewed?: boolean;
+  viewsCount?: number;
 }
 
 export type PostApiResponse = ApiResponse<Post>;
