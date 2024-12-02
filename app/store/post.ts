@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { create } from "zustand";
 
-import { createSelectors } from ".";
+import { createSelectors } from "./selectors";
 
 import { likePost, unlikePost } from "~/services/post";
 

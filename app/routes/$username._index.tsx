@@ -76,12 +76,6 @@ export default function Profile() {
         <Avatar className="-mt-24 h-40 w-40 border-4 border-black">
           <AvatarFallback>{username}</AvatarFallback>
         </Avatar>
-
-        {isOwner && (
-          <Button className="ml-auto rounded-full border py-6 text-xl font-semibold">
-            Edit Profile
-          </Button>
-        )}
       </div>
 
       <ProfileInfo profile={profile} />

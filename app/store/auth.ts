@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import type { User } from "~/types/user";
-import { createSelectors } from ".";
+import { createSelectors } from "./selectors";
 
 type State = {
   isLogged: boolean;
-  currentUser?: User;
+  currentUser: User | null;
 };
 
 type Actions = {
@@ -17,7 +17,7 @@ type Actions = {
 export const useAuth = create<State & Actions>((set) => ({
   isLogged: false,
   setIsLogged: (isLogged) => set({ isLogged }),
-  currentUser: undefined,
+  currentUser: null,
   setCurrentUser: (user) => set({ currentUser: user }),
 
   login: (user) => set({ currentUser: user }),

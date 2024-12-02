@@ -24,6 +24,7 @@ import { useNotificationStore } from "./store/notification";
 import type { NotificationApiResponseList } from "./types/notification";
 
 import "./tailwind.css";
+import { RightAside } from "./components/right-aside/right-aside";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -54,7 +55,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { decoded, token } = useLoaderData<typeof loader>();
 
-  const currentUser = useAuthStore.use.currentUser;
+  const currentUser = useAuthStore.use.currentUser();
   const setCurrentUser = useAuthStore.use.setCurrentUser();
 
   const [socket, setSocket] = useState<Socket>();
@@ -72,7 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [decoded, setCurrentUser, currentUser]);
 
   useEffect(() => {
-    if (!token || !socket) return;
+    if (!token) return;
 
     const notificationSocket = io(`http://localhost:3000/notifications`, {
       auth: {
@@ -94,7 +95,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return () => {
       notificationSocket.close();
     };
-  }, [token, addManyNotifications, setPagination, socket]);
+  }, [token, addManyNotifications, setPagination]);
 
   useEffect(() => {
     if (!socket) return;
@@ -108,6 +109,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     });
 
     socket.on("notification", (data) => {
+      console.log(data);
       addNotification(data);
     });
   }, [socket, addNotification]);
@@ -127,8 +129,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <NavigationAside />
           </aside>
           <div className="md:col-span-6">{children}</div>
-          <aside className="sticky bottom-0 top-0 hidden h-screen border-l p-4 md:col-span-3 md:block">
-            {/* <RightAside users={users} /> */}
+          <aside className="sticky bottom-0 top-0 hidden h-full border-l p-4 md:col-span-3 md:block">
+            <RightAside />
           </aside>
         </div>
 

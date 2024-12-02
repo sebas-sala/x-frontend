@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import { createSelectors } from ".";
+import { createSelectors } from "./selectors";
 
 import { handleApiFetchError } from "~/lib/api-utils";
 import {

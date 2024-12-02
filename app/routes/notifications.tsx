@@ -14,15 +14,17 @@ export default function Notifications() {
   }, [notifications, activeTab]);
 
   return (
-    <main className="mx-auto max-w-2xl">
-      <h1 className="mb-2 px-2 pt-2 text-2xl font-bold">Notifications</h1>
+    <main className="mx-auto">
+      <h1 className="sticky top-0 mb-2 px-2 pt-2 text-2xl font-bold">
+        Notifications
+      </h1>
       <Tabs
         value={activeTab}
         onValueChange={(value) => setActiveTab(value)}
         defaultValue="all"
         className="w-full"
       >
-        <TabsList className="grid grid-cols-4">
+        <TabsList className="sticky top-0 grid grid-cols-4">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="message">Messages</TabsTrigger>
           <TabsTrigger value="comment">Comments</TabsTrigger>

@@ -19,7 +19,6 @@ import { SignupModal } from "../auth/signup-dialog";
 import { useAuthStore } from "~/store/auth";
 import { MoreHorizontalIcon } from "lucide-react";
 
-// import PostButton from "./PostButton";
 export const NavigationAside = memo(() => {
   const location = useLocation();
   const fectcher = useFetcher();
@@ -122,7 +121,7 @@ export const NavigationAside = memo(() => {
           <PostButton />
         </div>
       </div>
-      <div className="mt-auto">
+      <div className="mt-auto pt-2">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-800 ring-0">
             <Avatar>

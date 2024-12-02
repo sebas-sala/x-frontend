@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { createSelectors } from ".";
+import { createSelectors } from "./selectors";
 
 import { Notification } from "~/types/notification";
 import { Pagination } from "~/types";

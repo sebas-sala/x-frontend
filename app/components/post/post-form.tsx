@@ -30,35 +30,6 @@ export default function PostForm({
 }: Props) {
   const [content, setContent] = useState("Hello, World!");
 
-  const getPrivacyTextAndIcon = () => {
-    if (privacy === "public") {
-      return {
-        text: "Everyone can reply",
-        icon: () => <Globe size={16} />,
-      };
-    }
-
-    if (privacy === "followed") {
-      return {
-        text: "Accounts you follow",
-        icon: () => <UserRoundCheck size={16} />,
-      };
-    }
-    if (privacy === "mentioned") {
-      return {
-        text: "Only accounts you mention",
-        icon: () => <AtSign size={16} />,
-      };
-    }
-
-    return {
-      text: "Private",
-      icon: () => <AtSign size={16} />,
-    };
-  };
-
-  const { text: privacyText, icon: privacyIcon } = getPrivacyTextAndIcon();
-
   const handlePost = async (event: React.FormEvent) => {
     try {
       event.preventDefault();
@@ -88,47 +59,16 @@ export default function PostForm({
           />
         </div>
       </div>
-      <div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 hover:bg-transparent"
-            >
-              {privacyIcon()}
-              {privacyText}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
-            <DropdownMenuLabel>Who can reply?</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup
-              value={privacy}
-              onValueChange={handlePrivacyChange}
-            >
-              <DropdownMenuRadioItem value="public">
-                Everyone
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="followed">
-                Accounts you follow
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="mentioned">
-                Only accounts you mention
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+      <div className="mt-4 flex items-center justify-between">
+        <Button
+          className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
+          type="submit"
+          disabled={!content || content.length < 10}
+        >
+          Post
+        </Button>
       </div>
-
-      {/* <Separator /> */}
-
-      <Button
-        className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
-        type="submit"
-        disabled={!content || content.length < 10}
-      >
-        Post
-      </Button>
     </form>
   );
 }

@@ -26,16 +26,19 @@ export async function getUserByUsername(username: string) {
 
 export async function getUsers({
   page = 1,
+  perPage = 15,
   filters,
   token,
 }: {
   page?: number;
+  perPage?: number;
   filters?: Record<string, string | number | boolean>[];
   token?: string;
 } = {}): Promise<UserApiResponseList> {
   const url = new URL(`${import.meta.env.VITE_API_URL}/users`);
 
   url.searchParams.append("page", page.toString());
+  url.searchParams.append("perPage", perPage.toString());
 
   if (filters) {
     filters.forEach((filter) => {
