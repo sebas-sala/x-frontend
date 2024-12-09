@@ -4,7 +4,6 @@ import {
   BanIcon,
   UserIcon,
   EllipsisIcon,
-  FrownIcon,
   Heart,
   Bookmark,
   BarChart2,
@@ -205,7 +204,7 @@ export function PostItem({
   const formattedDate = formatPostDate(new Date(post.createdAt));
 
   return (
-    <li className="list-none transition hover:bg-gray-100">
+    <li className="list-none overflow-hidden transition hover:bg-gray-100">
       <div
         onClick={() => navigate(`/${user.username}/${post.id}`)}
         onKeyDown={() => navigate(`/${user.username}/${post.id}`)}
@@ -232,11 +231,12 @@ export function PostItem({
                 onClick={(event) => event.stopPropagation()}
               >
                 {datePosition === "top" ? (
-                  <span className="flex gap-3">
-                    <p className="font-bold">{user.name}</p>
+                  <span className="line-clamp-1 flex gap-3 text-clip">
+                    <span className="line-clamp-1 text-clip">{user.name}</span>
                     <span className="flex gap-1 text-gray-500">
-                      <span>{user.username}</span>
-
+                      <span className="line-clamp-1 text-clip">
+                        {user.username}
+                      </span>
                       <span className="font-black">·</span>
                       <span>{formattedDate}</span>
                     </span>
@@ -244,7 +244,7 @@ export function PostItem({
                 ) : (
                   <span>
                     <p className="font-bold">{user.name}</p>
-                    <p className="block text-gray-500">{user.username}</p>
+                    <p className="text-gray-500">{user.username}</p>
                   </span>
                 )}
               </Link>

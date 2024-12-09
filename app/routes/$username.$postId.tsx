@@ -51,23 +51,23 @@ export default function PostPage() {
 
   const post = postResponse.data;
 
-  const { user } = post;
-  const { profile } = user;
+  const follow = useUserStore.use.follow();
+  const unfollow = useUserStore.use.unfollow();
+  const block = useUserStore.use.block();
 
-  const follow = useUserStore().follow;
-  const unfollow = useUserStore().unfollow;
-
-  const like = usePostStore().like;
-  const unlike = usePostStore().unlike;
+  const like = usePostStore.use.like();
+  const unlike = usePostStore.use.unlike();
 
   const hasViewedRef = useRef(false);
 
+  const currentUser = useAuthStore.use.currentUser();
+
   useEffect(() => {
-    if (post.isViewed || hasViewedRef.current) return;
+    if (post.isViewed || hasViewedRef.current || !currentUser) return;
 
     createPostView(post.id);
     hasViewedRef.current = true;
-  }, [post]);
+  }, [post, currentUser]);
 
   return (
     <main>
@@ -76,6 +76,7 @@ export default function PostPage() {
       </GoBack>
 
       <PostItem
+        block={block}
         datePosition="bottom"
         post={post as Post}
         like={like}

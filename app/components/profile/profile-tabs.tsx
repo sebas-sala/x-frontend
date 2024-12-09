@@ -49,7 +49,7 @@ export function ProfileTabs({
 
   return (
     <Tabs className="mt-4 w-full" defaultValue="posts">
-      <TabsList className="flex w-full bg-transparent">
+      <TabsList className="sticky top-0 flex w-full bg-transparent">
         {filteredTabs.map((tab) => (
           <TabsTrigger
             key={tab.value}

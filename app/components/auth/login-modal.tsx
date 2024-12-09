@@ -24,7 +24,7 @@ import { isApiResponse } from "~/lib/api-utils";
 
 type Props = {
   visible: boolean;
-  onChange: (visible: boolean) => void;
+  onChange: () => void;
 };
 
 export function LoginModal({ visible, onChange }: Props) {
@@ -64,7 +64,7 @@ export function LoginModal({ visible, onChange }: Props) {
         toast.error(data.message);
       }
     }
-  }, [setCurrentUser, fetcher.data]);
+  }, [setCurrentUser, fetcher.data, onChange]);
 
   return (
     <Dialog open={visible} onOpenChange={onChange}>

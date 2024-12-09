@@ -14,22 +14,20 @@ import {
 import { links } from "~/data/navigation";
 import { PostButton } from "../post/post-button";
 import { LoginModal } from "~/components/auth/login-modal";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { SignupModal } from "../auth/signup-dialog";
 import { useAuthStore } from "~/store/auth";
 import { MoreHorizontalIcon } from "lucide-react";
 
 export const NavigationAside = memo(() => {
   const location = useLocation();
-  const fectcher = useFetcher();
-
-  const avatarUrl = "https://github.com/shadcn.png";
+  const fetcher = useFetcher();
 
   const [visibleLoginModal, setVisibleLoginModal] = useState(false);
   const [visibleSignUpModal, setVisibleSignUpModal] = useState(false);
 
-  const currentUser = useAuthStore().currentUser;
-  const setCurrentUser = useAuthStore().setCurrentUser;
+  const currentUser = useAuthStore.use.currentUser();
+  const setCurrentUser = useAuthStore.use.setCurrentUser();
 
   const handleVisibleLoginModal = () => {
     setVisibleLoginModal(!visibleLoginModal);
@@ -40,9 +38,38 @@ export const NavigationAside = memo(() => {
   };
 
   async function handleLogout() {
-    fectcher.submit({ method: "post", action: "/auth/logout" });
+    fetcher.submit({}, { method: "post", action: "/auth/logout" });
     setCurrentUser(undefined);
   }
+  const ref = useRef<HTMLDivElement>(null);
+  const lastPositionRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentPosition = window.scrollY;
+      if (currentPosition < lastPositionRef.current) {
+        ref.current?.classList.remove(
+          "backdrop-blur-sm",
+          "backdrop-filter",
+          "opacity-55",
+        );
+      } else {
+        ref.current?.classList.add(
+          "backdrop-blur-sm",
+          "backdrop-filter",
+          "opacity-55",
+        );
+      }
+
+      lastPositionRef.current = currentPosition;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [lastPositionRef, ref]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -63,70 +90,81 @@ export const NavigationAside = memo(() => {
   }, [currentUser]);
 
   return (
-    <div className="sticky top-0 flex h-full max-h-dvh flex-col p-4">
-      <div>
-        <ul className="space-y-2">
-          {filteredLinks.map((item) => {
-            if (item.name.toLowerCase() === "profile") {
-              return (
-                <li key={item.name}>
-                  <NavigationLink
-                    to={`/${currentUser?.username}`}
-                    isActive={location.pathname === item.href}
-                  >
-                    {item.icon}
-                    <span>{item.name}</span>
-                  </NavigationLink>
-                </li>
-              );
-            }
-
+    <div
+      ref={ref}
+      className="top-0 z-50 h-full max-h-dvh w-full transform transition-all duration-300 md:sticky md:flex md:flex-col md:p-4"
+    >
+      <ul className="flex justify-evenly md:block md:space-y-2">
+        {filteredLinks.map((item) => {
+          if (item.name.toLowerCase() === "profile") {
             return (
               <li key={item.name}>
                 <NavigationLink
-                  to={item.href}
+                  to={`/${currentUser?.username}`}
                   isActive={location.pathname === item.href}
                 >
                   {item.icon}
-                  <span>{item.name}</span>
+                  <span className="hidden md:block">{item.name}</span>
                 </NavigationLink>
               </li>
             );
-          })}
-          {currentUser && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <li>
-                  <NavLinkButton>
-                    <MoreHorizontalIcon />
-                    <span>More</span>
-                  </NavLinkButton>
-                </li>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+          }
 
-                <DropdownMenuItem className="cursor-pointer" asChild>
-                  <Link to="/blocked-users">Blocked users</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" asChild>
+          return (
+            <li key={item.name}>
+              <NavigationLink
+                to={item.href}
+                isActive={location.pathname === item.href}
+              >
+                {item.icon}
+
+                <span className="hidden md:block">{item.name}</span>
+              </NavigationLink>
+            </li>
+          );
+        })}
+        {currentUser && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <li>
+                <NavLinkButton>
+                  <MoreHorizontalIcon />
+                  <span className="hidden md:block">More</span>
+                </NavLinkButton>
+              </li>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="cursor-pointer" asChild>
+                <Link
+                  to="/blocked-users"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  Blocked users
+                </Link>
+              </DropdownMenuItem>
+              {/* <DropdownMenuItem className="cursor-pointer" asChild>
                   <Link to="/subscriptions">Subscriptions</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </ul>
-        <div>
-          <PostButton />
-        </div>
+                </DropdownMenuItem> */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </ul>
+      <div className="hidden md:block">
+        <PostButton />
       </div>
-      <div className="mt-auto pt-2">
+
+      <div className="mt-auto hidden pt-2 md:block">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-800 ring-0">
             <Avatar>
-              <AvatarImage src={avatarUrl} />
-              modal <AvatarFallback>CN</AvatarFallback>
+              <AvatarImage />
+              <AvatarFallback>
+                {currentUser ? currentUser.username : "X"}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -162,15 +200,17 @@ export const NavigationAside = memo(() => {
         </DropdownMenu>
       </div>
 
-      <LoginModal
-        visible={visibleLoginModal}
-        onChange={handleVisibleLoginModal}
-      />
+      <div className="hidden md:block">
+        <LoginModal
+          visible={visibleLoginModal}
+          onChange={handleVisibleLoginModal}
+        />
 
-      <SignupModal
-        visible={visibleSignUpModal}
-        onChange={handleVisibleSignUpModal}
-      />
+        <SignupModal
+          visible={visibleSignUpModal}
+          onChange={handleVisibleSignUpModal}
+        />
+      </div>
     </div>
   );
 });

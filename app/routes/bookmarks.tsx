@@ -44,10 +44,8 @@ export default function Bookmarks() {
   });
 
   return (
-    <main>
-      <h1 className="mb-4 mt-2 px-2 text-2xl font-bold text-gray-800">
-        Bookmarks
-      </h1>
+    <main className="px-2">
+      <h1 className="mb-4 mt-2 text-2xl font-bold text-gray-800">Bookmarks</h1>
 
       <PostList
         initialData={posts}

@@ -1,13 +1,12 @@
-import { Link } from "@remix-run/react";
 import { Pagination } from "~/types";
 import { User } from "~/types/user";
-import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Loader } from "../loader";
 import { useInfiniteScroll } from "react-continous-scroll";
 import { useUserStore } from "~/store/user";
 import { useState } from "react";
 import { useAuthStore } from "~/store/auth";
+import { UserItem } from "../user/user-item";
 
 type FollowListProps = {
   users: User[];
@@ -25,7 +24,7 @@ export function FollowList({ users, pagination, fetchMore }: FollowListProps) {
   const follow = useUserStore().follow;
   const unfollow = useUserStore().unfollow;
 
-  const currentUser = useAuthStore().currentUser;
+  const currentUser = useAuthStore.use.currentUser();
 
   const handleFollow = async (userId: string, isFollowed?: boolean) => {
     isFollowed ? await unfollow(userId) : await follow(userId);
@@ -42,8 +41,8 @@ export function FollowList({ users, pagination, fetchMore }: FollowListProps) {
               <UserFollowItem
                 key={user.id}
                 user={user}
-                handleFollow={handleFollow}
                 currentUser={currentUser}
+                handleFollow={handleFollow}
               />
             ))}
           </ul>
@@ -61,50 +60,25 @@ export function UserFollowItem({
   handleFollow,
 }: {
   user: User;
-  handleFollow: (userId: string, isFollowed?: boolean) => void;
+  handleFollow: (userId: string, isFollowed?: boolean) => Promise<void>;
   currentUser?: User;
 }) {
   const [isFollowed, setIsFollowed] = useState(user.isFollowed);
 
-  const onClick = async (userId: string, isFollowed?: boolean) => {
-    setIsFollowed((prev) => !prev);
-
-    try {
-      handleFollow(userId, isFollowed);
-    } catch {
-      setIsFollowed((prev) => !prev);
-    }
+  const onFollow = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    await handleFollow(user.id, isFollowed);
+    setIsFollowed(!isFollowed);
   };
 
   return (
-    <li className="flex w-full flex-1 p-2">
-      <Link
-        to={`/${user.username}`}
-        className="flex w-full items-center justify-between"
+    <UserItem key={user.id} user={user} currentUser={currentUser}>
+      <Button
+        className="rounded-full border py-4 text-lg font-semibold"
+        onClick={onFollow}
       >
-        <span className="flex gap-4">
-          <Avatar>
-            <AvatarFallback>{user.username}</AvatarFallback>
-          </Avatar>
-          <span>
-            <span className="block text-xl font-black">{user.name}</span>
-            <span className="">{user.username}</span>
-          </span>
-        </span>
-        {currentUser?.id !== user.id && (
-          <span>
-            <Button
-              className="rounded-full border py-4 text-lg font-semibold"
-              onClick={(e) => {
-                e.preventDefault();
-                onClick(user.id, isFollowed);
-              }}
-            >
-              {isFollowed ? "Unfollow" : "Follow"}
-            </Button>
-          </span>
-        )}
-      </Link>
-    </li>
+        {isFollowed ? "Unfollow" : "Follow"}
+      </Button>
+    </UserItem>
   );
 }

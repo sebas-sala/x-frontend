@@ -8,7 +8,6 @@ import {
 } from "@remix-run/react";
 import { Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
-import { ArrowBigUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
@@ -65,7 +64,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const addManyNotifications = useNotificationStore.use.addManyNotifications();
 
   useEffect(() => {
-    if (decoded && !currentUser) {
+    if (!decoded) {
+      setCurrentUser(undefined);
+      return;
+    }
+
+    if (!currentUser) {
       getUser(decoded.sub).then((user) => {
         setCurrentUser(user.data);
       });
@@ -123,9 +127,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
         <title>X - Social Media</title>
       </head>
-      <body>
-        <div className="container relative mx-auto h-full max-h-screen md:grid md:grid-cols-12">
-          <aside className="fixed bottom-0 border-r md:sticky md:top-0 md:col-span-3">
+      <body className="overflow-y-scroll">
+        <div className="container relative mx-auto h-full max-h-screen min-h-screen md:grid md:grid-cols-12">
+          <header className="md:hidden">
+            <nav className="sticky top-0 z-50 w-full border-b bg-white">
+              <NavigationAside />
+            </nav>
+          </header>
+          <aside className="fixed bottom-0 z-50 w-full md:sticky md:top-0 md:col-span-3 md:border-r">
             <NavigationAside />
           </aside>
           <div className="md:col-span-6">{children}</div>
@@ -137,14 +146,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <ScrollRestoration />
         <Scripts />
         <Toaster richColors closeButton />
-
-        <ArrowBigUp
-          className="fixed bottom-4 right-4 -rotate-45 transform cursor-pointer text-gray-500 transition-all duration-300 hover:rotate-0 hover:scale-125 hover:text-gray-900"
-          size={32}
-          onClick={() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
       </body>
     </html>
   );

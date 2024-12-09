@@ -4,7 +4,7 @@ import { createSelectors } from "./selectors";
 
 type State = {
   isLogged: boolean;
-  currentUser: User | null;
+  currentUser: User | undefined;
 };
 
 type Actions = {
@@ -17,7 +17,7 @@ type Actions = {
 export const useAuth = create<State & Actions>((set) => ({
   isLogged: false,
   setIsLogged: (isLogged) => set({ isLogged }),
-  currentUser: null,
+  currentUser: undefined,
   setCurrentUser: (user) => set({ currentUser: user }),
 
   login: (user) => set({ currentUser: user }),
