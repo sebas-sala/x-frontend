@@ -1,17 +1,42 @@
 import { apiFetch, setSearchParams } from "~/lib/api-utils";
+import { Filter } from "~/types";
 
 import type { PostApiResponse, PostApiResponseList } from "~/types/post";
 
-export async function createPost({ content }: { content: string }) {
+function convertToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function createPost({
+  content,
+  file,
+  parentId,
+}: {
+  content: string;
+  file: File | null;
+  parentId?: string;
+}) {
   const url = `${import.meta.env.VITE_API_URL}/posts`;
+
+  const formData = new FormData();
+  formData.append("content", content);
+  if (file) {
+    const base64Image = await convertToBase64(file);
+    formData.append("image", base64Image);
+  }
+  if (parentId) {
+    formData.append("parentId", parentId);
+  }
 
   return apiFetch<PostApiResponse>(url, {
     method: "POST",
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content }),
+    body: formData,
   });
 }
 
@@ -54,7 +79,7 @@ export async function getPosts({
   page?: number;
   token?: string;
   orderBy?: string;
-  filters?: Record<string, string | number | boolean>[];
+  filters?: Filter[];
 }): Promise<PostApiResponseList> {
   const url = new URL(`${import.meta.env.VITE_API_URL}/posts`);
 

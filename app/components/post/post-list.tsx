@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader } from "~/components/loader";
 import { PostItem } from "~/components/post/post-item";
@@ -70,12 +70,10 @@ export function PostList({ initialData, pagination, fetchMore }: Props) {
           })}
         </ul>
       ) : (
-        <p className="text-gray-500">No posts found</p>
+        <Loader ref={loadMoreRef} loading={loading} loadMore={loadMore}>
+          <p className="text-gray-500">No more posts to load</p>
+        </Loader>
       )}
-
-      <Loader ref={loadMoreRef} loading={loading} loadMore={loadMore}>
-        <p className="text-gray-500">No more posts to load</p>
-      </Loader>
     </>
   );
 }

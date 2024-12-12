@@ -94,7 +94,7 @@ export const NavigationAside = memo(() => {
       ref={ref}
       className="top-0 z-50 h-full max-h-dvh w-full transform transition-all duration-300 md:sticky md:flex md:flex-col md:p-4"
     >
-      <ul className="flex justify-evenly md:block md:space-y-2">
+      <ul className="flex justify-evenly px-1 md:block md:space-y-2">
         {filteredLinks.map((item) => {
           if (item.name.toLowerCase() === "profile") {
             return (

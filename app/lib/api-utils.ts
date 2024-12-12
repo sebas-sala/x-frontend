@@ -5,6 +5,7 @@ import type {
   ApiResponseList,
   ApiResponseListUnion,
   ApiResponseUnion,
+  Filter,
 } from "~/types";
 
 export async function apiFetch<T>(
@@ -95,12 +96,11 @@ export function handleApiError(err: unknown) {
   }
 }
 
-export async function setSearchParams(
-  url: URL,
-  params: Record<string, string | number | boolean>,
-): Promise<URL> {
+export async function setSearchParams(url: URL, params: Filter): Promise<URL> {
   Object.entries(params).forEach(([key, value]) => {
-    url.searchParams.append(key, value.toString());
+    if (value !== undefined) {
+      url.searchParams.append(key, value.toString());
+    }
   });
 
   return url;

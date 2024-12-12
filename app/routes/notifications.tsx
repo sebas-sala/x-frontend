@@ -24,16 +24,12 @@ export default function Notifications() {
         defaultValue="all"
         className="w-full"
       >
-        <TabsList className="sticky top-0 grid grid-cols-4">
+        <TabsList className="sticky top-0 grid grid-cols-3">
           <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="message">Messages</TabsTrigger>
           <TabsTrigger value="comment">Comments</TabsTrigger>
           <TabsTrigger value="like">Likes</TabsTrigger>
         </TabsList>
         <TabsContent value="all">
-          <NotificationsList notifications={filteredNotifications} />
-        </TabsContent>
-        <TabsContent value="message">
           <NotificationsList notifications={filteredNotifications} />
         </TabsContent>
         <TabsContent value="comment">

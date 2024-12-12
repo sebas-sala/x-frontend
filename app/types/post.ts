@@ -15,6 +15,7 @@ export interface Post {
   isBookmarked?: boolean;
   isViewed?: boolean;
   viewsCount?: number;
+  image_url?: string;
 }
 
 export type PostApiResponse = ApiResponse<Post>;

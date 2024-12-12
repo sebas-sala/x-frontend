@@ -36,7 +36,7 @@ export function ProfileTabs({
     pagination: repliesPagination,
     fetchMorePosts: fetchMoreReplies,
   } = usePostData({
-    filters: [{ by_replies: true }],
+    filters: [{ by_reply: true }],
   });
 
   const {

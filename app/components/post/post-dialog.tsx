@@ -12,21 +12,14 @@ import PostForm from "./post-form";
 
 interface Props {
   open: boolean;
-  privacy: string;
   handleOnOpenChange: (open: boolean) => void;
-  handlePrivacyChange: (privacy: string) => void;
 }
 
-export function PostDialog({
-  open,
-  privacy,
-  handleOnOpenChange,
-  handlePrivacyChange,
-}: Props) {
+export function PostDialog({ open, handleOnOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
       <DialogTrigger asChild>
-        <Button className="text-center  w-full bg-sky-500 font-bold py-8 text-lg mt-10 rounded-full">
+        <Button className="mt-10 w-full rounded-full bg-sky-500 py-8 text-center text-lg font-bold">
           Post
         </Button>
       </DialogTrigger>
@@ -39,11 +32,7 @@ export function PostDialog({
           </DialogDescription>
 
           <div className="pt-4">
-            <PostForm
-              privacy={privacy}
-              handlePrivacyChange={handlePrivacyChange}
-              handleOnOpenChange={handleOnOpenChange}
-            />
+            <PostForm handleOnOpenChange={handleOnOpenChange} />
           </div>
         </DialogHeader>
         <DialogFooter></DialogFooter>

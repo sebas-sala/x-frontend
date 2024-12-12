@@ -14,25 +14,7 @@ type Actions = {
   unlike: (entityId: string) => Promise<void>;
 };
 
-// function updatePosts(
-//   posts: Post[],
-//   entityId: string,
-//   isLiked: boolean,
-//   delta: number,
-// ) {
-//   return posts.map((post) => {
-//     if (post.id === entityId) {
-//       return {
-//         ...post,
-//         isLiked,
-//         likesCount: post.likesCount ? post.likesCount + delta : delta,
-//       };
-//     }
-//     return post;
-//   });
-// }
-
-export const usePost = create<State & Actions>((set) => ({
+export const usePost = create<State & Actions>(() => ({
   like: async (entityId: string) => {
     try {
       await likePost(entityId);

@@ -12,17 +12,10 @@ import {
 
 interface Props {
   open: boolean;
-  privacy: string;
   handleOnOpenChange: (open: boolean) => void;
-  handlePrivacyChange: (privacy: string) => void;
 }
 
-export function PostDrawer({
-  open,
-  privacy,
-  handleOnOpenChange,
-  handlePrivacyChange,
-}: Props) {
+export function PostDrawer({ open, handleOnOpenChange }: Props) {
   return (
     <Drawer open={open} onOpenChange={handleOnOpenChange}>
       <DrawerTrigger asChild>

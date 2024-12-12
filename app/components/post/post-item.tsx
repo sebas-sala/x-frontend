@@ -41,14 +41,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Textarea } from "../ui/textarea";
 import { bookmarkPost, unbookmarkPost } from "~/services/post";
+import PostForm from "./post-form";
 
 interface Props {
   post: Post;
@@ -203,6 +201,10 @@ export function PostItem({
 
   const formattedDate = formatPostDate(new Date(post.createdAt));
 
+  const handleOnOpenChange = (open: boolean) => {
+    setCommentOpen(open);
+  };
+
   return (
     <li className="list-none overflow-hidden transition hover:bg-gray-100">
       <div
@@ -276,9 +278,15 @@ export function PostItem({
 
             <div className="py-2 pt-6">
               <p className="">{post.content}</p>
-            </div>
 
-            {/* <div className="my-2 rounded-xl border h-[400px]">hola</div> */}
+              {post.image_url && (
+                <img
+                  src={post.image_url}
+                  alt={post.content}
+                  className="mt-2 max-h-96 w-full rounded-lg object-cover shadow-lg"
+                />
+              )}
+            </div>
 
             <div className="mt-2 flex w-full justify-between font-semibold text-gray-500">
               <ActionList entityId={post.id} actions={actions} />
@@ -287,43 +295,26 @@ export function PostItem({
         </div>
       </div>
 
-      {/* <Dialog open={commentOpen} onOpenChange={setCommentOpen}>
+      <Dialog open={commentOpen}>
         <DialogTrigger className="sr-only">Open</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="hidden">
-              Are you absolutely sure?
+              Comment on @{user.username}
             </DialogTitle>
-            <DialogDescription className="flex items-center">
-              <form onSubmit={handlePost}>
-                <div className="grid grid-cols-12 space-x-4">
-                  <div className="col-span-1">
-                    <Avatar>
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <div className="col-span-11">
-                    <Textarea
-                      placeholder="What's on your mind, Chad?"
-                      className="max-h-36"
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <Button
-                  className="rounded-full bg-sky-500 px-6 text-xl font-bold hover:bg-sky-400"
-                  type="submit"
-                  disabled={!content || content.length < 10}
-                >
-                  Post
-                </Button>
-              </form>
+            <DialogDescription className="hidden">
+              This is a dialog to comment on @{user.username}&apos;s post.
             </DialogDescription>
           </DialogHeader>
+          <div>
+            <PostForm
+              parentId={post.id}
+              type="comment"
+              handleOnOpenChange={handleOnOpenChange}
+            />
+          </div>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
 
       <BlockAlertDialog
         username={user.username}
