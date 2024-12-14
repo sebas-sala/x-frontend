@@ -19,7 +19,7 @@ export function PostDialog({ open, handleOnOpenChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
       <DialogTrigger asChild>
-        <Button className="mt-10 w-full rounded-full bg-sky-500 py-8 text-center text-lg font-bold">
+        <Button className="mt-0 h-full rounded-full bg-sky-500 text-center text-sm font-bold md:mt-10 md:w-full md:py-8 md:text-lg">
           Post
         </Button>
       </DialogTrigger>

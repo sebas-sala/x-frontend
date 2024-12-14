@@ -133,6 +133,10 @@ export const NavigationAside = memo(() => {
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+
+        <li className="size-ful md:hidden">
+          <PostButton />
+        </li>
       </ul>
       <div className="hidden md:block">
         <PostButton />
