@@ -12,7 +12,10 @@ import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 
-import { NavigationAside } from "./components/navigation-aside/navigation-aside";
+import {
+  AuthDropdown,
+  NavigationAside,
+} from "./components/navigation-aside/navigation-aside";
 
 import { getSession } from "./sessions";
 import { getUser } from "./services/user";
@@ -107,7 +110,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container relative mx-auto h-full max-h-screen min-h-screen md:grid md:grid-cols-12">
           <header className="md:hidden">
             <nav className="sticky top-0 z-50 w-full border-b bg-white">
-              <NavigationAside />
+              <div className="container mx-auto">
+                <div className="flex items-center justify-between p-2">
+                  <div>X - Social Media</div>
+                  <div>
+                    <AuthDropdown />
+                  </div>
+                </div>
+              </div>
             </nav>
           </header>
           <aside className="fixed bottom-0 z-50 w-full md:sticky md:top-0 md:col-span-3 md:border-r">

@@ -70,11 +70,11 @@ export function SignupModal({ visible, onChange }: Props) {
 
   return (
     <Dialog open={visible} onOpenChange={onChange}>
-      <DialogTrigger>
-        <div className="sr-only" />
+      <DialogTrigger className="hidden">
+        <Button variant="secondary">Sign Up</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md ">
-        <form className="sm:max-w-md space-y-4" onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-md">
+        <form className="space-y-4 sm:max-w-md" onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Sign Up</DialogTitle>
             <DialogDescription>
@@ -125,12 +125,12 @@ export function SignupModal({ visible, onChange }: Props) {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <DialogFooter className="justify-end mt-10">
+          <DialogFooter className="mt-10 justify-end">
             <DialogClose asChild>
               <Button
                 type="button"
                 variant="ghost"
-                className="hover:bg-opacity-20 hover:bg-zinc-700"
+                className="hover:bg-zinc-700 hover:bg-opacity-20"
                 onClick={() => onChange(false)}
               >
                 Close

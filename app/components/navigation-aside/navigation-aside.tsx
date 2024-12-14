@@ -21,26 +21,9 @@ import { MoreHorizontalIcon } from "lucide-react";
 
 export const NavigationAside = memo(() => {
   const location = useLocation();
-  const fetcher = useFetcher();
-
-  const [visibleLoginModal, setVisibleLoginModal] = useState(false);
-  const [visibleSignUpModal, setVisibleSignUpModal] = useState(false);
 
   const currentUser = useAuthStore.use.currentUser();
-  const setCurrentUser = useAuthStore.use.setCurrentUser();
 
-  const handleVisibleLoginModal = () => {
-    setVisibleLoginModal(!visibleLoginModal);
-  };
-
-  const handleVisibleSignUpModal = () => {
-    setVisibleSignUpModal(!visibleSignUpModal);
-  };
-
-  async function handleLogout() {
-    fetcher.submit({}, { method: "post", action: "/auth/logout" });
-    setCurrentUser(undefined);
-  }
   const ref = useRef<HTMLDivElement>(null);
   const lastPositionRef = useRef(0);
 
@@ -49,13 +32,13 @@ export const NavigationAside = memo(() => {
       const currentPosition = window.scrollY;
       if (currentPosition < lastPositionRef.current) {
         ref.current?.classList.remove(
-          "backdrop-blur-sm",
+          "backdrop-blur-lg",
           "backdrop-filter",
           "opacity-55",
         );
       } else {
         ref.current?.classList.add(
-          "backdrop-blur-sm",
+          "backdrop-blur-lg",
           "backdrop-filter",
           "opacity-55",
         );
@@ -70,14 +53,6 @@ export const NavigationAside = memo(() => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [lastPositionRef, ref]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (!visibleLoginModal && !visibleSignUpModal) {
-        document.body.style.pointerEvents = "";
-      }
-    }, 250);
-  }, [visibleLoginModal, visibleSignUpModal]);
 
   const filteredLinks = useMemo(() => {
     return links.filter((item) => {
@@ -158,60 +133,86 @@ export const NavigationAside = memo(() => {
       </div>
 
       <div className="mt-auto hidden pt-2 md:block">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-800 ring-0">
-            <Avatar>
-              <AvatarImage />
-              <AvatarFallback>
-                {currentUser ? currentUser.username : "X"}
-              </AvatarFallback>
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {currentUser ? (
-              <>
-                <DropdownMenuItem className="cursor-pointer" asChild>
-                  <Link to={`/${currentUser.username}`}>Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={handleLogout}
-                >
-                  Log out @{currentUser.username}
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={handleVisibleLoginModal}
-                >
-                  Login
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={handleVisibleSignUpModal}
-                >
-                  Sign Up
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div className="hidden md:block">
-        <LoginModal
-          visible={visibleLoginModal}
-          onChange={handleVisibleLoginModal}
-        />
-
-        <SignupModal
-          visible={visibleSignUpModal}
-          onChange={handleVisibleSignUpModal}
-        />
+        <AuthDropdown />
       </div>
     </div>
   );
 });
 NavigationAside.displayName = "NavigationAside";
+
+export const AuthDropdown = ({}) => {
+  const fetcher = useFetcher();
+  const currentUser = useAuthStore.use.currentUser();
+  const setCurrentUser = useAuthStore.use.setCurrentUser();
+
+  const handleLogout = async () => {
+    await fetcher.submit({}, { method: "post", action: "/auth/logout" });
+    setCurrentUser(undefined);
+  };
+
+  const [visibleLoginModal, setVisibleLoginModal] = useState(false);
+  const [visibleSignUpModal, setVisibleSignUpModal] = useState(false);
+
+  const handleVisibleLoginModal = () => {
+    setVisibleLoginModal(!visibleLoginModal);
+  };
+
+  const handleVisibleSignUpModal = () => {
+    setVisibleSignUpModal(!visibleSignUpModal);
+  };
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border-0 bg-gray-800 ring-0">
+          <Avatar>
+            <AvatarImage />
+            <AvatarFallback>
+              {currentUser ? currentUser.username : "X"}
+            </AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {currentUser ? (
+            <>
+              <DropdownMenuItem className="cursor-pointer" asChild>
+                <Link to={`/${currentUser.username}`}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleLogout}
+              >
+                Log out @{currentUser.username}
+              </DropdownMenuItem>
+            </>
+          ) : (
+            <>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleVisibleLoginModal}
+              >
+                Login
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={handleVisibleSignUpModal}
+              >
+                Sign Up
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <LoginModal
+        visible={visibleLoginModal}
+        onChange={handleVisibleLoginModal}
+      />
+
+      <SignupModal
+        visible={visibleSignUpModal}
+        onChange={handleVisibleSignUpModal}
+      />
+    </>
+  );
+};

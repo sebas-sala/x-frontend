@@ -68,8 +68,8 @@ export function LoginModal({ visible, onChange }: Props) {
 
   return (
     <Dialog open={visible} onOpenChange={onChange}>
-      <DialogTrigger>
-        <div className="sr-only" />
+      <DialogTrigger className="hidden">
+        <Button>Login</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form className="space-y-4 sm:max-w-md" onSubmit={handleSubmit}>
