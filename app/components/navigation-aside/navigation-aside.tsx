@@ -56,7 +56,10 @@ export const NavigationAside = memo(() => {
 
   const filteredLinks = useMemo(() => {
     return links.filter((item) => {
-      if (item.name.toLowerCase() === "profile") {
+      if (
+        item.name.toLowerCase() === "profile" ||
+        item.name.toLowerCase() === "notifications"
+      ) {
         if (!currentUser) return null;
       }
 

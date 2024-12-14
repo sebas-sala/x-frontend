@@ -21,7 +21,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       notificationsResponse,
     };
   } catch {
-    throw new Error("Failed to load posts");
+    throw new Error("Failed to load notifications");
   }
 };
 
@@ -50,8 +50,6 @@ export default function Notifications() {
       return [];
     }
   }
-
-  console.log("hola");
 
   const { data, loadMoreRef, loading, loadMore } = useInfiniteScroll({
     initialData: notifications as unknown as Notification[],

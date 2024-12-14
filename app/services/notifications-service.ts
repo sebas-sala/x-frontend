@@ -1,13 +1,13 @@
 import { apiFetch, setSearchParams } from "~/lib/api-utils";
 import { NotificationApiResponseList } from "~/types/notification";
 
-export async function getNotifications({
+export function getNotifications({
   token,
-  page,
+  page = 1,
 }: {
   token?: string;
   page?: number;
-}): Promise<NotificationApiResponseList> {
+}) {
   const url = new URL(`${import.meta.env.VITE_API_URL}/notifications`);
 
   setSearchParams(url, { page });
