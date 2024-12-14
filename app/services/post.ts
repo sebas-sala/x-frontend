@@ -3,15 +3,6 @@ import { Filter } from "~/types";
 
 import type { PostApiResponse, PostApiResponseList } from "~/types/post";
 
-function convertToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 export async function createPost({
   content,
   file,
@@ -26,8 +17,7 @@ export async function createPost({
   const formData = new FormData();
   formData.append("content", content);
   if (file) {
-    const base64Image = await convertToBase64(file);
-    formData.append("image", base64Image);
+    formData.append("image", file);
   }
   if (parentId) {
     formData.append("parentId", parentId);

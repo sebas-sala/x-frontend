@@ -6,7 +6,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
@@ -18,9 +18,6 @@ import { getSession } from "./sessions";
 import { getUser } from "./services/user";
 
 import { useAuthStore } from "./store/auth";
-import { useNotificationStore } from "./store/notification";
-
-import type { NotificationApiResponseList } from "./types/notification";
 
 import "./tailwind.css";
 import { RightAside } from "./components/right-aside/right-aside";
@@ -59,10 +56,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const [socket, setSocket] = useState<Socket>();
 
-  const setPagination = useNotificationStore.use.setPagination();
-  const addNotification = useNotificationStore.use.addNotification();
-  const addManyNotifications = useNotificationStore.use.addManyNotifications();
-
   useEffect(() => {
     if (!decoded) {
       setCurrentUser(undefined);
@@ -88,35 +81,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
     });
     setSocket(notificationSocket);
 
-    notificationSocket.emit(
-      "getNotifications",
-      (data: NotificationApiResponseList) => {
-        addManyNotifications(data.data);
-        setPagination(data.meta.pagination);
-      },
-    );
-
     return () => {
       notificationSocket.close();
     };
-  }, [token, addManyNotifications, setPagination]);
+  }, [token]);
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("connect", () => {
-      console.log("connected");
-    });
-
-    socket.on("disconnect", () => {
-      console.log("disconnected");
-    });
-
     socket.on("notification", (data) => {
-      console.log(data);
-      addNotification(data);
+      toast(data.message);
     });
-  }, [socket, addNotification]);
+  }, [socket]);
 
   return (
     <html lang="en">
