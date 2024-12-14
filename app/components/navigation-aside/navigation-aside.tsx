@@ -58,7 +58,8 @@ export const NavigationAside = memo(() => {
     return links.filter((item) => {
       if (
         item.name.toLowerCase() === "profile" ||
-        item.name.toLowerCase() === "notifications"
+        item.name.toLowerCase() === "notifications" ||
+        item.name.toLowerCase() === "bookmarks"
       ) {
         if (!currentUser) return null;
       }

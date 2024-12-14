@@ -70,9 +70,6 @@ export function SignupModal({ visible, onChange }: Props) {
 
   return (
     <Dialog open={visible} onOpenChange={onChange}>
-      <DialogTrigger className="hidden">
-        <Button variant="secondary">Sign Up</Button>
-      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form className="space-y-4 sm:max-w-md" onSubmit={handleSubmit}>
           <DialogHeader>

@@ -32,7 +32,7 @@ export default function PostForm({
   handleOnOpenChange,
 }: Props) {
   const [loading, setLoading] = useState(false);
-  const [content, setContent] = useState("Hello, World!");
+  const [content, setContent] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
