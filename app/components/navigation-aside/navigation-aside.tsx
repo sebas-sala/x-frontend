@@ -1,4 +1,4 @@
-import { Link, useFetcher, useLocation } from "@remix-run/react";
+import { Link, useFetcher, useLocation, useNavigate } from "@remix-run/react";
 
 import NavigationLink, { NavLinkButton } from "./navigation-link";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -145,12 +145,12 @@ NavigationAside.displayName = "NavigationAside";
 
 export const AuthDropdown = ({}) => {
   const fetcher = useFetcher();
+  const navigate = useNavigate();
   const currentUser = useAuthStore.use.currentUser();
-  const setCurrentUser = useAuthStore.use.setCurrentUser();
 
   const handleLogout = async () => {
     await fetcher.submit({}, { method: "post", action: "/auth/logout" });
-    setCurrentUser(undefined);
+    navigate("/home");
   };
 
   const [visibleLoginModal, setVisibleLoginModal] = useState(false);
