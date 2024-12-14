@@ -67,7 +67,7 @@ export default function Explore() {
   return (
     <main>
       <Tabs defaultValue="trending">
-        <TabsList className="sticky top-0 flex h-auto w-full bg-transparent p-0">
+        <TabsList className="sticky top-0 flex h-auto w-full p-0">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.value}

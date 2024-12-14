@@ -36,11 +36,13 @@ export const NavigationAside = memo(() => {
           "backdrop-filter",
           "opacity-55",
         );
+        ref.current?.classList.add("bg-white");
       } else {
         ref.current?.classList.add(
           "backdrop-blur-lg",
           "backdrop-filter",
           "opacity-55",
+          "bg-transparent",
         );
       }
 
@@ -71,7 +73,7 @@ export const NavigationAside = memo(() => {
   return (
     <div
       ref={ref}
-      className="top-0 z-50 h-full max-h-dvh w-full transform transition-all duration-300 md:sticky md:flex md:flex-col md:p-4"
+      className="top-0 z-50 h-full max-h-dvh w-full transform bg-white transition-all duration-300 md:sticky md:flex md:flex-col md:p-4"
     >
       <ul className="flex justify-evenly px-1 md:block md:space-y-2">
         {filteredLinks.map((item) => {
